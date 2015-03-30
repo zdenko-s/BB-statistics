@@ -1,6 +1,7 @@
 package com.example.bbstatistics;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -34,7 +35,7 @@ public class PlayerListActivity extends FragmentActivity
      */
     private boolean mTwoPane;
     private DbHelper mDbHelper;
-    private PlayerListFragment mTeamsFragment;
+    private PlayerListFragment mPlayersOfTeamFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +48,9 @@ public class PlayerListActivity extends FragmentActivity
 
         // Show the Up button in the action bar.
 /*        getSupportActionBar().setDisplayHomeAsUpEnabled(true);    */
-        mTeamsFragment = ((PlayerListFragment) getSupportFragmentManager()
+        mPlayersOfTeamFragment = ((PlayerListFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.player_list));
-        if (mTeamsFragment != null) {
+        if (mPlayersOfTeamFragment != null) {
             Log.d(Consts.TAG, "PlayerListActivity.onCreate(), teamsFragment present");
         } else {
             Log.d(Consts.TAG, "PlayerListActivity.onCreate(), teamsFragment is null");
@@ -83,9 +84,10 @@ public class PlayerListActivity extends FragmentActivity
         Log.d(Consts.TAG, "PlayerListActivity.onResume()");
         super.onResume();
         mDbHelper.open();
-        if (mTeamsFragment != null) {
+        if (mPlayersOfTeamFragment != null) {
             Log.d(Consts.TAG, "PlayerListActivity.onResume(), teamsFragment present");
-            mTeamsFragment.setDatasource(mDbHelper.getListOfTeams());
+            Cursor cursor = mDbHelper.getListOfTeams();
+            mPlayersOfTeamFragment.setDatasource(cursor);
         } else {
             Log.d(Consts.TAG, "PlayerListActivity.onResume(), teamsFragment is null");
         }

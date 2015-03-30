@@ -10,11 +10,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
-import com.example.bbstatistics.dummy.DummyContent;
 
 /**
  * A list fragment representing a list of Players. This fragment
@@ -123,8 +121,8 @@ public class PlayerListFragment extends ListFragment {
         super.onResume();
         //setListAdapter(new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
         //        android.R.layout.simple_list_item_activated_1, android.R.id.text1, DummyContent.ITEMS));
-        ArrayAdapter<DummyContent.DummyItem> dataAdapter1 = new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-                android.R.layout.simple_list_item_activated_1, android.R.id.text1, DummyContent.ITEMS);
+        //ArrayAdapter<DummyContent.DummyItem> dataAdapter1 = new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
+        //        android.R.layout.simple_list_item_activated_1, android.R.id.text1, DummyContent.ITEMS);
         int[] bindTo = new int[]{R.id.txtTeamId, R.id.txtTeamName};
         SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(getActivity(), R.layout.row_layout_team
                 , mTeamsCursor, DbHelper.Teams.COLUMNS, bindTo, 0);
@@ -158,6 +156,9 @@ public class PlayerListFragment extends ListFragment {
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
 //        mCallbacks.onItemSelected(DummyContent.ITEMS.get(position).id);
+        Cursor c = ((SimpleCursorAdapter) listView.getAdapter()).getCursor();
+        c.moveToPosition(position);
+        mCallbacks.onItemSelected(c.getString(1));
     }
 
     @Override
