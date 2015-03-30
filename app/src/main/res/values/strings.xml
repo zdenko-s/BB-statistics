@@ -10,4 +10,6 @@
     <string name="add_game">Add game</string>
     <string name="continue_game">Continue game</string>
     <string name="title_activity_startup">StartupActivity</string>
+    <string name="title_player_list">Players</string>
+    <string name="title_player_detail">Player Detail</string>
 </resources>

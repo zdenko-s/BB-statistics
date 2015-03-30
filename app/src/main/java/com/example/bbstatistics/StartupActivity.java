@@ -7,8 +7,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 
@@ -23,7 +21,7 @@ public class StartupActivity extends Activity {
         setContentView(R.layout.activity_startup);
         // Add listeners
         mDbHelper = new DbHelper(this);
-        mDbHelper.open();
+        //mDbHelper.open();
         // Test adapter
         /*
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
@@ -35,6 +33,7 @@ public class StartupActivity extends Activity {
         ListView listView = (ListView) findViewById(R.id.listViewTeamsTest);
         //listView.setAdapter(adapter);
         */
+        Log.v(Consts.TAG, "StartupActivity.onCreate()");
     }
 
     @Override
@@ -49,6 +48,13 @@ public class StartupActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        Log.v(Consts.TAG, "StartupActivity.onResume()");
+        mDbHelper.open();
+        super.onResume();
+    }
+
+    @Override
     protected void onPause() {
         Log.v(Consts.TAG, "StartupActivity.onPause()");
         //TODO: Commit changes to DB
@@ -57,10 +63,9 @@ public class StartupActivity extends Activity {
     }
 
     @Override
-    protected void onResume() {
-        Log.v(Consts.TAG, "StartupActivity.onResume()");
-        mDbHelper.open();
-        super.onResume();
+    protected void onStop() {
+        super.onStop();
+        Log.v(Consts.TAG, "StartupActivity.onStop()");
     }
 
     @Override
@@ -106,7 +111,7 @@ public class StartupActivity extends Activity {
     }
 
     public void addPlayer(View view) {
-        Intent intent = new Intent(this, Statistic.class);
+        Intent intent = new Intent(this, PlayerListActivity.class);
         startActivity(intent);
     }
 }

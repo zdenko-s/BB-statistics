@@ -16,6 +16,7 @@ public class Statistic extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.v(Consts.TAG, "Statistic(Activity).onCreate()");
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
         //WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -50,6 +51,12 @@ public class Statistic extends Activity {
     protected void onPause() {
         Log.v(Consts.TAG, "Statistic(Activity).onPause()");
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.v(Consts.TAG, "Statistic(Activity).onStop()");
+        super.onStop();
     }
 
     @Override
