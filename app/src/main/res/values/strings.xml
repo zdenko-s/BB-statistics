@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">BB statistics</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_bbstat_start">BBStatistics</string>
+
+    <string name="add_team">Add team</string>
+    <string name="add_player">Add player</string>
+    <string name="add_game">Add game</string>
+    <string name="continue_game">Continue game</string>
+    <string name="title_activity_startup">StartupActivity</string>
+</resources>

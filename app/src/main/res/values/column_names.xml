@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="bb_column_names">
+        <item>1pt</item>
+        <item>1at</item>
+        <item>2p</item>
+        <item>2a</item>
+        <item>3pt</item>
+        <item>3a</item>
+        <item>DR</item>
+        <item>OR</item>
+        <item>T</item>
+        <item>S</item>
+    </string-array>
+</resources>

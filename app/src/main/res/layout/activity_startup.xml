@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true">
+
+    <TextView
+        android:id="@+id/TextView01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Basketball statistics"
+        android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/btn_add_team"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/TextView01"
+        android:onClick="addTeam"
+        android:text="@string/add_team" />
+
+    <Button
+        android:id="@+id/btn_add_player"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/btn_add_team"
+        android:layout_toRightOf="@id/btn_add_team"
+        android:onClick="addPlayer"
+        android:text="@string/add_player" />
+
+    <Button
+        android:id="@+id/btn_add_game"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn_add_team"
+        android:text="@string/add_game" />
+
+    <Button
+        android:id="@+id/btn_continue_started_game"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn_add_team"
+        android:layout_toRightOf="@id/btn_add_game"
+        android:text="@string/continue_game" />
+
+    <ListView
+        android:id="@+id/listViewTeamsTest"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn_add_game" />
+</RelativeLayout>
