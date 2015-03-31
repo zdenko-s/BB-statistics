@@ -33,6 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/btn_add_team"
+        android:onClick="addGame"
         android:text="@string/add_game" />
 
     <Button

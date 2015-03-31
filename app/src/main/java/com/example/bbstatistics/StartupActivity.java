@@ -1,12 +1,16 @@
 package com.example.bbstatistics;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 
@@ -110,8 +114,33 @@ public class StartupActivity extends Activity {
         dlg.show();
     }
 
+    /**
+     * Start new activity to insert new player
+     *
+     * @param view
+     */
     public void addPlayer(View view) {
         Intent intent = new Intent(this, PlayerListActivity.class);
         startActivity(intent);
+    }
+
+    /**
+     * Add game to team. Show dialog to choose team. When team selected, add game.
+     *
+     * @param view
+     */
+    public void addGame(View view) {
+        Cursor cursor = mDbHelper.getListOfTeams();
+        new AlertDialog.Builder(this)
+                .setTitle("Select team:")
+                .setCursor(cursor, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(StartupActivity.this, "Selected " + which, Toast.LENGTH_SHORT).show();
+                        Log.d(Consts.TAG, "Selected team:" + which);
+                    }
+                }, DbHelper.Team.COL_NAME)
+                .create()
+                .show();
     }
 }
