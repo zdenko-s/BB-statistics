@@ -17,6 +17,7 @@ public class StartupActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.v(Consts.TAG, "StartupActivity.onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_startup);
         // Add listeners
@@ -33,7 +34,6 @@ public class StartupActivity extends Activity {
         ListView listView = (ListView) findViewById(R.id.listViewTeamsTest);
         //listView.setAdapter(adapter);
         */
-        Log.v(Consts.TAG, "StartupActivity.onCreate()");
     }
 
     @Override

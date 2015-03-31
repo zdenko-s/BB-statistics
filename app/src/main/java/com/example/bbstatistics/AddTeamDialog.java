@@ -39,7 +39,7 @@ public class AddTeamDialog extends Dialog {
         // XML defined views which the data will be bound to. Specify ID of widgets
         int[] bindTo = new int[]{R.id.txtTeamId, R.id.txtTeamName};
         SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(mContext, R.layout.row_layout_team
-                , cursor, DbHelper.Teams.COLUMNS, bindTo, 0);
+                , cursor, DbHelper.Team.COLUMNS, bindTo, 0);
         ListView lvTeams = (ListView) findViewById(R.id.listViewTeams);
         lvTeams.setAdapter(dataAdapter);
 

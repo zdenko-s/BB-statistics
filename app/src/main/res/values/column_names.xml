@@ -3,13 +3,15 @@
     <string-array name="bb_column_names">
         <item>1pt</item>
         <item>1at</item>
-        <item>2p</item>
-        <item>2a</item>
+        <item>2pt</item>
+        <item>2at</item>
         <item>3pt</item>
-        <item>3a</item>
+        <item>3at</item>
         <item>DR</item>
         <item>OR</item>
-        <item>T</item>
-        <item>S</item>
+        <item>TO</item>
+        <item>St</item>
+        <item>F</item>
+        <item>Fg</item>
     </string-array>
 </resources>

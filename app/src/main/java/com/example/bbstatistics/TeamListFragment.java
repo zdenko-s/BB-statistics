@@ -18,12 +18,12 @@ import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
  * A list fragment representing a list of Players. This fragment
  * also supports tablet devices by allowing list items to be given an
  * 'activated' state upon selection. This helps indicate which item is
- * currently being viewed in a {@link PlayerDetailFragment}.
+ * currently being viewed in a {@link TeamDetailFragment}.
  * <p/>
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class PlayerListFragment extends ListFragment {
+public class TeamListFragment extends ListFragment {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -54,7 +54,7 @@ public class PlayerListFragment extends ListFragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public PlayerListFragment() {
+    public TeamListFragment() {
         Log.d(Consts.TAG, "PlayerListFragment.PlayerListFragment()");
     }
 
@@ -123,14 +123,11 @@ public class PlayerListFragment extends ListFragment {
         //        android.R.layout.simple_list_item_activated_1, android.R.id.text1, DummyContent.ITEMS));
         //ArrayAdapter<DummyContent.DummyItem> dataAdapter1 = new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
         //        android.R.layout.simple_list_item_activated_1, android.R.id.text1, DummyContent.ITEMS);
-        int[] bindTo = new int[]{R.id.txtTeamId, R.id.txtTeamName};
-        SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(getActivity(), R.layout.row_layout_team
-                , mTeamsCursor, DbHelper.Teams.COLUMNS, bindTo, 0);
-        int[] bindTo2 = new int[]{android.R.id.text1, android.R.id.text2};
-        SimpleCursorAdapter dataAdapter2 = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_list_item_activated_2
-                , mTeamsCursor, DbHelper.Teams.COLUMNS, bindTo2, 0);
+        int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
+        SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_list_item_activated_2
+                , mTeamsCursor, DbHelper.Team.COLUMNS, bindTo, 0);
 
-        setListAdapter(dataAdapter2);
+        setListAdapter(dataAdapter);
     }
 
     @Override
@@ -158,7 +155,7 @@ public class PlayerListFragment extends ListFragment {
 //        mCallbacks.onItemSelected(DummyContent.ITEMS.get(position).id);
         Cursor c = ((SimpleCursorAdapter) listView.getAdapter()).getCursor();
         c.moveToPosition(position);
-        mCallbacks.onItemSelected(c.getString(1));
+        mCallbacks.onItemSelected(Integer.toString(c.getInt(0)));
     }
 
     @Override

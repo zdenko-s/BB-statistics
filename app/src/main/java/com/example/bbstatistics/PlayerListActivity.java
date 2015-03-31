@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 
@@ -19,15 +20,15 @@ import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
  * item details side-by-side using two vertical panes.
  * <p/>
  * The activity makes heavy use of fragments. The list of items is a
- * {@link PlayerListFragment} and the item details
- * (if present) is a {@link PlayerDetailFragment}.
+ * {@link TeamListFragment} and the item details
+ * (if present) is a {@link TeamDetailFragment}.
  * <p/>
  * This activity also implements the required
- * {@link PlayerListFragment.Callbacks} interface
+ * {@link TeamListFragment.Callbacks} interface
  * to listen for item selections.
  */
 public class PlayerListActivity extends FragmentActivity
-        implements PlayerListFragment.Callbacks {
+        implements TeamListFragment.Callbacks, TeamDetailFragment.Callbacks {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -35,7 +36,8 @@ public class PlayerListActivity extends FragmentActivity
      */
     private boolean mTwoPane;
     private DbHelper mDbHelper;
-    private PlayerListFragment mPlayersOfTeamFragment;
+    private TeamListFragment mPlayersOfTeamFragment;
+    private int mSelectedTeamId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +50,7 @@ public class PlayerListActivity extends FragmentActivity
 
         // Show the Up button in the action bar.
 /*        getSupportActionBar().setDisplayHomeAsUpEnabled(true);    */
-        mPlayersOfTeamFragment = ((PlayerListFragment) getSupportFragmentManager()
+        mPlayersOfTeamFragment = ((TeamListFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.player_list));
         if (mPlayersOfTeamFragment != null) {
             Log.d(Consts.TAG, "PlayerListActivity.onCreate(), teamsFragment present");
@@ -65,7 +67,7 @@ public class PlayerListActivity extends FragmentActivity
 
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
-            ((PlayerListFragment) getSupportFragmentManager()
+            ((TeamListFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.player_list))
                     .setActivateOnItemClick(true);
         }
@@ -124,20 +126,24 @@ public class PlayerListActivity extends FragmentActivity
     }
 
     /**
-     * Callback method from {@link PlayerListFragment.Callbacks}
+     * Callback method from {@link TeamListFragment.Callbacks}
      * indicating that the item with the given ID was selected.
      */
     @Override
     public void onItemSelected(String id) {
+        mSelectedTeamId = Integer.parseInt(id);
         Log.d(Consts.TAG, "PlayerListActivity.onItemSelected(String id):" + id);
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(PlayerDetailFragment.ARG_ITEM_ID, id);
-            PlayerDetailFragment fragment = new PlayerDetailFragment();
+            arguments.putString(TeamDetailFragment.ARG_ITEM_ID, id);
+            TeamDetailFragment fragment = new TeamDetailFragment();
             fragment.setArguments(arguments);
+            int teamId = Integer.parseInt(id);
+            Cursor cursor = mDbHelper.getPlayersOfTeam(teamId);
+            fragment.setDataSource(cursor);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.player_detail_container, fragment)
                     .commit();
@@ -146,8 +152,19 @@ public class PlayerListActivity extends FragmentActivity
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, PlayerDetailActivity.class);
-            detailIntent.putExtra(PlayerDetailFragment.ARG_ITEM_ID, id);
+            detailIntent.putExtra(TeamDetailFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
+        }
+    }
+
+    @Override
+    public void onItemAdded(String num, String name) {
+        // Add player to DB
+        try {
+            int playerNum = Integer.parseInt(num);
+            mDbHelper.addPlayer(mSelectedTeamId, playerNum, name);
+        } catch (NumberFormatException nfe) {
+            Toast.makeText(this, num + " is not number.", Toast.LENGTH_SHORT);
         }
     }
 }
