@@ -1,5 +1,7 @@
 package com.example.bbstatistics;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -8,7 +10,9 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TimePicker;
 
@@ -17,40 +21,38 @@ import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 import java.util.Calendar;
 
 
-public class NewGame extends ActionBarActivity {
+public class NewGame extends ActionBarActivity implements View.OnClickListener {
 //public class NewGame extends Activity {
 
-    private DatePicker mdpDateOfGame;
-    private TimePicker mtpTimeOfGame;
+    // Widget GUI
+    private Button btnCalendar, btnTimePicker;
+    private EditText txtDate, txtTime;
     private DbHelper mDbHelper;
     private Cursor mTeamsCursor;
     private ListView mlvTeams;
+    // Variable for storing current date and time
+    private int mYear, mMonth, mDay, mHour, mMinute;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_game);
         //
+        btnCalendar = (Button) findViewById(R.id.btnCalendar);
+        btnTimePicker = (Button) findViewById(R.id.btnTimePicker);
+
+        txtDate = (EditText) findViewById(R.id.txtDate);
+        txtTime = (EditText) findViewById(R.id.txtTime);
+
+        btnCalendar.setOnClickListener(this);
+        btnTimePicker.setOnClickListener(this);
+        //
         mlvTeams = (ListView) findViewById(R.id.listViewTeams);
         mlvTeams.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mDbHelper = new DbHelper(this);
         // Get starting intent
         Intent intent = getIntent();
-        // Set Date
-        mdpDateOfGame = (DatePicker) findViewById(R.id.dpDate);
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        mdpDateOfGame.init(year, month, day, null);
-        //dpDateOfGame.getYear();
-        // Time
-        mtpTimeOfGame = (TimePicker) findViewById(R.id.tpTimeOfGame);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int min = calendar.get(Calendar.MINUTE);
-        mtpTimeOfGame.setIs24HourView(true);
-        mtpTimeOfGame.setCurrentHour(hour);
-        mtpTimeOfGame.setCurrentMinute(min);
+
     }
 
     @Override
@@ -115,4 +117,42 @@ public class NewGame extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onClick(View v) {
+        if (v == btnCalendar) {
+            // Process to get Current Date
+            final Calendar c = Calendar.getInstance();
+            mYear = c.get(Calendar.YEAR);
+            mMonth = c.get(Calendar.MONTH);
+            mDay = c.get(Calendar.DAY_OF_MONTH);
+
+            // Launch Date Picker Dialog
+            DatePickerDialog dpd = new DatePickerDialog(this,
+                    new DatePickerDialog.OnDateSetListener() {
+                        @Override
+                        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                            // Display Selected date in textbox
+                            txtDate.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                        }
+                    }, mYear, mMonth, mDay);
+            dpd.show();
+        }
+        if (v == btnTimePicker) {
+            // Process to get Current Time
+            final Calendar c = Calendar.getInstance();
+            mHour = c.get(Calendar.HOUR_OF_DAY);
+            mMinute = c.get(Calendar.MINUTE);
+
+            // Launch Time Picker Dialog
+            TimePickerDialog tpd = new TimePickerDialog(this,
+                    new TimePickerDialog.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                            // Display Selected time in textbox
+                            txtTime.setText(hourOfDay + ":" + minute);
+                        }
+                    }, mHour, mMinute, true);
+            tpd.show();
+        }
+    }
 }
