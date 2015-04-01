@@ -1,16 +1,12 @@
 package com.example.bbstatistics;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 
@@ -26,18 +22,19 @@ public class StartupActivity extends Activity {
         setContentView(R.layout.activity_startup);
         // Add listeners
         mDbHelper = new DbHelper(this);
-        //mDbHelper.open();
+        mDbHelper.open();
         // Test adapter
         /*
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-                R.layout.row_layout_team,
+                android.R.layout.simple_list_item_activated_2,
                 mDbHelper.getListOfTeams(),
-                DbHelper.Teams.COLUMNS,
-                new int[]{R.id.txtTeamId, R.id.txtTeamName}, 0);
+                DbHelper.Team.COLUMNS,
+                new int[]{android.R.id.text1, android.R.id.text2}, 0);
 
         ListView listView = (ListView) findViewById(R.id.listViewTeamsTest);
-        //listView.setAdapter(adapter);
-        */
+        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        listView.setAdapter(adapter);
+        //*/
     }
 
     @Override
@@ -53,9 +50,17 @@ public class StartupActivity extends Activity {
 
     @Override
     protected void onResume() {
-        Log.v(Consts.TAG, "StartupActivity.onResume()");
-        mDbHelper.open();
         super.onResume();
+//        Log.v(Consts.TAG, "StartupActivity.onResume()");
+        /*
+        mDbHelper.open();
+        Cursor teamsCursor = mDbHelper.getListOfTeams();
+        int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
+        SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
+                , teamsCursor, DbHelper.Team.COLUMNS, bindTo, 0);
+        ListView lvTeams = (ListView) findViewById(R.id.listViewTeamsTest);
+        lvTeams.setAdapter(dataAdapter);
+        */
     }
 
     @Override
@@ -124,12 +129,27 @@ public class StartupActivity extends Activity {
         startActivity(intent);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(Consts.TAG, "onActivityResult(), requestCode:" + requestCode + ", resultCode:" + resultCode);
+        if (resultCode == RESULT_OK) {
+            // check if the request code is same as what is passed
+            if (requestCode == Consts.ACTIVITY_REQUEST_NEW_GAME) {
+                String message = data.getStringExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY);
+                Log.d(Consts.TAG, "onActivityResult:" + message);
+            }
+        }
+    }
     /**
      * Add game to team. Show dialog to choose team. When team selected, add game.
      *
      * @param view
      */
     public void addGame(View view) {
+        Intent intent = new Intent(this, NewGame.class);
+        startActivityForResult(intent, Consts.ACTIVITY_REQUEST_NEW_GAME);
+        /*
         Cursor cursor = mDbHelper.getListOfTeams();
         new AlertDialog.Builder(this)
                 .setTitle("Select team:")
@@ -142,5 +162,6 @@ public class StartupActivity extends Activity {
                 }, DbHelper.Team.COL_NAME)
                 .create()
                 .show();
+                */
     }
 }

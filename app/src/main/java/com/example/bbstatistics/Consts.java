@@ -5,4 +5,6 @@ package com.example.bbstatistics;
  */
 public final class Consts {
     public static final String TAG = "BBStat";
+    public static final int ACTIVITY_REQUEST_NEW_GAME = 1;
+    public static final String ACTIVITY_RESULT_NEW_GAME_KEY = "newGameResultData1";
 }

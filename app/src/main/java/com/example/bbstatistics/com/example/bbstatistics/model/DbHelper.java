@@ -40,6 +40,7 @@ public class DbHelper extends SQLiteOpenHelper {
      * @return
      */
     public Cursor getListOfTeams() {
+        Log.d(Consts.TAG, "DbHelper#getListOfTeams(");
         Cursor cursor = mDb.query(Team.TEAM_TABLE, Team.COLUMNS, null, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
