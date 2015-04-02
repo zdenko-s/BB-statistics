@@ -13,7 +13,7 @@ import android.view.MenuItem;
  * in a {@link PlayerListActivity}.
  * <p/>
  * This activity is mostly just a 'shell' activity containing nothing
- * more than a {@link TeamDetailFragment}.
+ * more than a {@link TeamPlayersDetailFragment}.
  */
 public class PlayerDetailActivity extends ActionBarActivity {
 
@@ -38,9 +38,9 @@ public class PlayerDetailActivity extends ActionBarActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(TeamDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(TeamDetailFragment.ARG_ITEM_ID));
-            TeamDetailFragment fragment = new TeamDetailFragment();
+            arguments.putString(TeamPlayersDetailFragment.ARG_ITEM_ID,
+                    getIntent().getStringExtra(TeamPlayersDetailFragment.ARG_ITEM_ID));
+            TeamPlayersDetailFragment fragment = new TeamPlayersDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.player_detail_container, fragment)

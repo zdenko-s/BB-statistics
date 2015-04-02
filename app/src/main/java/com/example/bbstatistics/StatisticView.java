@@ -16,18 +16,19 @@ import android.widget.Button;
 import com.example.bbstatistics.com.example.bbstatistics.model.BBPlayer;
 
 public class StatisticView extends View implements View.OnClickListener {
-    private static final int ROWS = 6;//, COLS = 10;
-    private static final int NAME_COL_WIDTH = 200;
+    private static final int DATA_ROWS = 6;//, COLS = 10;
+    private static final int NAME_COL_WIDTH_MULTYPLIER = 3;//, COLS = 10;
     float mTextSize = 10, mVerticalPadding = 0;
     int mRowHeight, mColWidth;
+    //private static final int NAME_COL_WIDTH = 200;
+    private int mNameColWidth;
     private Paint mPaint;
     private int mWidth, mHeight;
     private Bitmap canvasBitmap;
     private Canvas drawCanvas;
     private TextPaint mTextPaint = new TextPaint(), mHeaderTextPaint = new TextPaint();
-    private int[][] data;// = new int[ROWS][COLS];
+    private int[][] data;// = new int[DATA_ROWS][COLS];
     private int mIncrement = 1;
-    private BBPlayer mBBPlayer;
 
     public StatisticView(Context context) {
         super(context);
@@ -56,8 +57,7 @@ public class StatisticView extends View implements View.OnClickListener {
         mPaint.setStrokeWidth(5f);
         // Get Model from Activity
         Statistic stat = (Statistic) getContext();
-        mBBPlayer = stat.getModel();
-        data = new int[ROWS][mBBPlayer.getColumnCount()];
+        data = new int[DATA_ROWS][BBPlayer.getColumnCount()];
     }
 
     @Override
@@ -72,9 +72,10 @@ public class StatisticView extends View implements View.OnClickListener {
 
     private void adjustTextSize() {
         // One more row needed for header row
-        mRowHeight = getHeight() / (ROWS + 1);
+        mRowHeight = getHeight() / (DATA_ROWS + 1);
         // Name column is header column
-        mColWidth = (getWidth() - NAME_COL_WIDTH) / mBBPlayer.getColumnCount();
+        mNameColWidth = getWidth() / (BBPlayer.getColumnCount() + NAME_COL_WIDTH_MULTYPLIER) * NAME_COL_WIDTH_MULTYPLIER;
+        mColWidth = (getWidth() - mNameColWidth) / BBPlayer.getColumnCount();
         // Set Paint properties
         mHeaderTextPaint.setColor(Color.BLUE);
         mTextPaint.setColor(Color.BLACK);
@@ -112,23 +113,23 @@ public class StatisticView extends View implements View.OnClickListener {
     private void drawGrid(Canvas canvas) {
         int w = getWidth();
         int h = getHeight();
-        //float rowHeight = getHeight() / ROWS;
+        //float rowHeight = getHeight() / DATA_ROWS;
         //float colWidth = (getWidth() - NAME_COL_WIDTH) / COLS;
         // Display horizontal lines
-        for (int i = 1; i <= ROWS; i++) {
+        for (int i = 1; i <= DATA_ROWS; i++) {
             canvas.drawLine(0, i * mRowHeight, w, i * mRowHeight, mPaint);
         }
         // Display vertical lines
-        for (int col = 0; col < mBBPlayer.getColumnCount(); col++) {
-            canvas.drawLine(NAME_COL_WIDTH + col * mColWidth, 0, NAME_COL_WIDTH + col * mColWidth, h, mPaint);
+        for (int col = 0; col < BBPlayer.getColumnCount(); col++) {
+            canvas.drawLine(mNameColWidth + col * mColWidth, 0, mNameColWidth + col * mColWidth, h, mPaint);
         }
         // Display column headers
-        String[] colHeaders = mBBPlayer.getColumnNames();
+        String[] colHeaders = BBPlayer.getColumnNames();
         // Display values
-        for (int col = 0; col < mBBPlayer.getColumnCount(); col++) {
-            int dx = NAME_COL_WIDTH + col * mColWidth;
+        for (int col = 0; col < BBPlayer.getColumnCount(); col++) {
+            int dx = mNameColWidth + col * mColWidth;
             canvas.drawText(colHeaders[col], dx, mRowHeight, mHeaderTextPaint);
-            for (int row = 0; row < ROWS; row++) {
+            for (int row = 0; row < DATA_ROWS; row++) {
                 int dy = (int) (row * mRowHeight + 2 * mRowHeight - mVerticalPadding);
                 //if(row == 0 && col == 0)
                 //    Log.d(Consts.TAG, "drawGrid [0,0]; dx=" + dx + ", dy=" + dy);
@@ -146,13 +147,13 @@ public class StatisticView extends View implements View.OnClickListener {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 Log.d(Consts.TAG, "Touched at x:" + x + ", y:" + y);
-                if (x > NAME_COL_WIDTH && y > mRowHeight) {
+                if (x > mNameColWidth && y > mRowHeight) {
                     // Calculate row, col what was touched
-                    col = (int) ((x - NAME_COL_WIDTH) / mColWidth);
+                    col = (int) ((x - mNameColWidth) / mColWidth);
                     row = (int) ((y - mRowHeight) / mRowHeight);
                     Log.d(Consts.TAG, "Touched at col:" + col + ", row:" + row);
                     if (row >= 0 && col >= 0) {
-                        if (row < ROWS && col < mBBPlayer.getColumnCount()) {
+                        if (row < DATA_ROWS && col < BBPlayer.getColumnCount()) {
                             // Is cell data 0? It can't be decremented
                             if (mIncrement < 0 && data[row][col] == 0)
                                 break;
@@ -161,7 +162,7 @@ public class StatisticView extends View implements View.OnClickListener {
                             Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col]);
                             // Calculate size of rectangle to invalidate
                             int t = (row + 1) * mRowHeight;
-                            int l = NAME_COL_WIDTH + col * mColWidth;
+                            int l = mNameColWidth + col * mColWidth;
                             //Rect invalidRect = new Rect(l, t, l + mColWidth, t + mRowHeight);
                             //Log.d(Consts.TAG, "Invalidate Rect:" + invalidRect.toShortString());
                             invalidate();

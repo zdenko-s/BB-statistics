@@ -24,6 +24,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <Spinner
+            android:id="@+id/spinnerTeam"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <LinearLayout
             android:id="@+id/linearLayout1"
             android:layout_width="match_parent"
@@ -69,7 +74,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btn_plus_minus"
+            android:id="@+id/btn_add_game"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
@@ -87,6 +92,5 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:layout_weight="1">
-    </LinearLayout>
+        android:layout_weight="1"></LinearLayout>
 </LinearLayout>

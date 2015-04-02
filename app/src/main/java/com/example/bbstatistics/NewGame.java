@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TimePicker;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
@@ -30,6 +31,7 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
     private DbHelper mDbHelper;
     private Cursor mTeamsCursor;
     private ListView mlvTeams;
+    private Spinner mspnTeams;
     // Variable for storing current date and time
     private int mYear, mMonth, mDay, mHour, mMinute;
 
@@ -49,6 +51,8 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         //
         mlvTeams = (ListView) findViewById(R.id.listViewTeams);
         mlvTeams.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        mspnTeams = (Spinner) findViewById(R.id.spinnerTeam);
+        //
         mDbHelper = new DbHelper(this);
         // Get starting intent
         Intent intent = getIntent();
@@ -67,9 +71,15 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         // Load data from DB and populate Views
         mTeamsCursor = mDbHelper.getListOfTeams();
         int[] bindTo = new int[]{android.R.id.text1};
+        String[] cursorColumns = new String[]{DbHelper.Team.COL_NAME};
         SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_1
-                , mTeamsCursor, new String[]{DbHelper.Team.COL_NAME}, bindTo, 0);
+                , mTeamsCursor, cursorColumns, bindTo, 0);
         mlvTeams.setAdapter(dataAdapter);
+        // Reuse cursor to populate spinner with teams
+        SimpleCursorAdapter dataAdapterSpinner = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item
+                , mTeamsCursor, cursorColumns, bindTo, 0);
+        dataAdapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mspnTeams.setAdapter(dataAdapterSpinner);
     }
 
     @Override

@@ -1,17 +1,19 @@
 package com.example.bbstatistics;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
@@ -22,7 +24,7 @@ import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
  * in two-pane mode (on tablets) or a {@link PlayerDetailActivity}
  * on handsets.
  */
-public class TeamDetailFragment extends Fragment {
+public class TeamPlayersDetailFragment extends Fragment {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -40,7 +42,7 @@ public class TeamDetailFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public TeamDetailFragment() {
+    public TeamPlayersDetailFragment() {
     }
 
     @Override
@@ -79,12 +81,18 @@ public class TeamDetailFragment extends Fragment {
                     return;
                 }
                 Log.d(Consts.TAG, "New player: #:" + playerNum + ", Name:" + playerName);
-                mCallback.onItemAdded(playerNum.toString(), playerName.toString());
+                Cursor cursor = mCallback.onItemAdded(playerNum.toString(), playerName.toString());
                 txPlayerNumber.getText().clear();
                 txPlayerName.getText().clear();
+                // Hiding the keyboard
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(txPlayerNumber.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(txPlayerName.getWindowToken(), 0);
+
                 // Refresh ListView
                 // TODO: How to update cursor?
-                mDataAdapter.notifyDataSetChanged();
+                mDataAdapter.swapCursor(cursor);
+                //mDataAdapter.notifyDataSetChanged();
                 Toast.makeText(getActivity(), playerName + " added", Toast.LENGTH_SHORT).show();
             }
         });
@@ -114,6 +122,6 @@ public class TeamDetailFragment extends Fragment {
         /**
          * Callback for when an item has been added.
          */
-        public void onItemAdded(String id, String name);
+        public Cursor onItemAdded(String id, String name);
     }
 }

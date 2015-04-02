@@ -8,11 +8,8 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Button;
 
-import com.example.bbstatistics.com.example.bbstatistics.model.BBPlayer;
-
 
 public class Statistic extends Activity {
-    private BBPlayer bbPlayerModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,7 +19,6 @@ public class Statistic extends Activity {
         //WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         super.onCreate(savedInstanceState);
-        bbPlayerModel = new BBPlayer(getApplicationContext());
         setContentView(R.layout.activity_statistic);
         addListeners();
         getResources().getStringArray(R.array.bb_column_names);
@@ -81,7 +77,4 @@ public class Statistic extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public BBPlayer getModel() {
-        return bbPlayerModel;
-    }
 }

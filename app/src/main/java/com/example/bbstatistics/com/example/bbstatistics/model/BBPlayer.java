@@ -8,29 +8,24 @@ import com.example.bbstatistics.R;
  * Data model of Basketball player
  */
 public class BBPlayer {
-    private final Context mContext;
-    private final String[] mColNames;
-
-    /**
-     * Creates instance of BBPlayer model
-     *
-     * @param applicationContext Activity which created BBPlayer
-     */
-    public BBPlayer(Context applicationContext) {
-        mContext = applicationContext;
-        mColNames = mContext.getResources().getStringArray(R.array.bb_column_names);
-    }
+    private static Context mAppContext;
+    private static String[] mColNames;
 
     /**
      * Gets list of available columns.
      *
      * @return Array of strings of column names
      */
-    public String[] getColumnNames() {
+    public static String[] getColumnNames() {
         return mColNames;
     }
 
-    public int getColumnCount() {
+    public static int getColumnCount() {
         return mColNames.length;
+    }
+
+    public static void setContext(Context applicationContext) {
+        mAppContext = applicationContext;
+        mColNames = mAppContext.getResources().getStringArray(R.array.bb_column_names);
     }
 }

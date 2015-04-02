@@ -18,7 +18,7 @@ import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
  * A list fragment representing a list of Players. This fragment
  * also supports tablet devices by allowing list items to be given an
  * 'activated' state upon selection. This helps indicate which item is
- * currently being viewed in a {@link TeamDetailFragment}.
+ * currently being viewed in a {@link TeamPlayersDetailFragment}.
  * <p/>
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
@@ -59,14 +59,14 @@ public class TeamListFragment extends ListFragment {
     }
 
     public void setDatasource(Cursor listOfTeams) {
-        Log.d(Consts.TAG, "PlayerListFragment.setDatasource()");
+        Log.d(Consts.TAG, "TeamListFragment.setDatasource()");
         mTeamsCursor = listOfTeams;
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        Log.d(Consts.TAG, "PlayerListFragment.onAttach()");
+        Log.d(Consts.TAG, "TeamListFragment.onAttach()");
         // Activities containing this fragment must implement its callbacks.
         if (!(activity instanceof Callbacks)) {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
@@ -78,7 +78,7 @@ public class TeamListFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(Consts.TAG, "PlayerListFragment.onCreate()");
+        Log.d(Consts.TAG, "TeamListFragment.onCreate()");
 
         // TODO: replace with a real list adapter.
 //        setListAdapter(new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
@@ -87,14 +87,14 @@ public class TeamListFragment extends ListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(Consts.TAG, "PlayerListFragment.onCreateView()");
+        Log.d(Consts.TAG, "TeamListFragment.onCreateView()");
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.d(Consts.TAG, "PlayerListFragment.onViewCreated()");
+        Log.d(Consts.TAG, "TeamListFragment.onViewCreated()");
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
@@ -106,18 +106,18 @@ public class TeamListFragment extends ListFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(Consts.TAG, "PlayerListFragment.onActivityCreated()");
+        Log.d(Consts.TAG, "TeamListFragment.onActivityCreated()");
     }
 
     @Override
     public void onStart() {
-        Log.d(Consts.TAG, "PlayerListFragment.onStart()");
+        Log.d(Consts.TAG, "TeamListFragment.onStart()");
         super.onStart();
     }
 
     @Override
     public void onResume() {
-        Log.d(Consts.TAG, "PlayerListFragment.onResume()");
+        Log.d(Consts.TAG, "TeamListFragment.onResume()");
         super.onResume();
         //setListAdapter(new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
         //        android.R.layout.simple_list_item_activated_1, android.R.id.text1, DummyContent.ITEMS));
@@ -132,13 +132,13 @@ public class TeamListFragment extends ListFragment {
 
     @Override
     public void onPause() {
-        Log.d(Consts.TAG, "PlayerListFragment.onPause()");
+        Log.d(Consts.TAG, "TeamListFragment.onPause()");
         super.onPause();
     }
 
     @Override
     public void onDetach() {
-        Log.d(Consts.TAG, "PlayerListFragment.onDetach()");
+        Log.d(Consts.TAG, "TeamListFragment.onDetach()");
         super.onDetach();
 
         // Reset the active callbacks interface to the dummy implementation.
@@ -147,7 +147,7 @@ public class TeamListFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
-        Log.d(Consts.TAG, "PlayerListFragment.onListItemClick()");
+        Log.d(Consts.TAG, "TeamListFragment.onListItemClick()");
         super.onListItemClick(listView, view, position, id);
 
         // Notify the active callbacks interface (the activity, if the

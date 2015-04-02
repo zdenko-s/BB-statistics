@@ -2,27 +2,84 @@ package com.example.bbstatistics;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
+import com.example.bbstatistics.com.example.bbstatistics.model.BBPlayer;
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 
+class GestureListener extends GestureDetector.SimpleOnGestureListener {
+
+    public boolean onDown(MotionEvent e) {
+        return true;
+    }
+
+    public boolean onDoubleTap(MotionEvent e) {
+        Log.d(Consts.TAG, "Double_Tap");
+        return true;
+    }
+}
 
 public class StartupActivity extends Activity {
 
+    SimpleCursorAdapter mDataAdapter;
     private DbHelper mDbHelper;
+    private ListView mlvGames;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.v(Consts.TAG, "StartupActivity.onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_startup);
-        // Add listeners
+        // Init singleton
+        BBPlayer.setContext(getApplicationContext());
+        // Setup list, list's event listeners,
+        mlvGames = (ListView) findViewById(R.id.listViewTeamsTest);
+        mlvGames.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        // Create Adapter
+        int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
+        mDataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
+                , null, DbHelper.Team.COLUMNS, bindTo, 0);
+        mlvGames.setAdapter(mDataAdapter);
+        mlvGames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(Consts.TAG, "onItemClick(); position:" + position + ", id:" + id);
+            }
+        });
+        mlvGames.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(Consts.TAG, "onItemLongClick(); position:" + position + ", id:" + id);
+                return true;
+            }
+        });
+        /*
+        GestureDetector gestureDectector = new GestureDetector(this, new GestureListener());
+        mlvGames.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent e) {
+                ListView list = (ListView) v;
+                if(list != null) {
+                    int position = list.pointToPosition((int) e.getX(), (int) e.getY());
+                    Log.d(Consts.TAG, "Touched row:" + position);
+                }
+                return false;
+            }
+        });
+        */
+        //
         mDbHelper = new DbHelper(this);
-        mDbHelper.open();
+        //mDbHelper.open();
         // Test adapter
         /*
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
@@ -51,16 +108,17 @@ public class StartupActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-//        Log.v(Consts.TAG, "StartupActivity.onResume()");
-        /*
+        Log.v(Consts.TAG, "StartupActivity.onResume()");
+        //*
         mDbHelper.open();
+        // Display list of games in list
         Cursor teamsCursor = mDbHelper.getListOfTeams();
-        int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
-        SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
-                , teamsCursor, DbHelper.Team.COLUMNS, bindTo, 0);
-        ListView lvTeams = (ListView) findViewById(R.id.listViewTeamsTest);
-        lvTeams.setAdapter(dataAdapter);
-        */
+        //int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
+        //mDataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
+        //        , teamsCursor, DbHelper.Team.COLUMNS, bindTo, 0);
+        Cursor oldCursor = mDataAdapter.swapCursor(teamsCursor);
+        //mlvGames.setAdapter(mDataAdapter);
+        //*/
     }
 
     @Override
@@ -129,20 +187,8 @@ public class StartupActivity extends Activity {
         startActivity(intent);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(Consts.TAG, "onActivityResult(), requestCode:" + requestCode + ", resultCode:" + resultCode);
-        if (resultCode == RESULT_OK) {
-            // check if the request code is same as what is passed
-            if (requestCode == Consts.ACTIVITY_REQUEST_NEW_GAME) {
-                String message = data.getStringExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY);
-                Log.d(Consts.TAG, "onActivityResult:" + message);
-            }
-        }
-    }
     /**
-     * Add game to team. Show dialog to choose team. When team selected, add game.
+     * Add game to team.
      *
      * @param view
      */
@@ -163,5 +209,28 @@ public class StartupActivity extends Activity {
                 .create()
                 .show();
                 */
+    }
+
+    /**
+     * Return point from child activity
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(Consts.TAG, "onActivityResult(), requestCode:" + requestCode + ", resultCode:" + resultCode);
+        if (resultCode == RESULT_OK) {
+            // check if the request code is same as what is passed
+            if (requestCode == Consts.ACTIVITY_REQUEST_NEW_GAME) {
+                String message = data.getStringExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY);
+                Log.d(Consts.TAG, "onActivityResult (NewGame):" + message);
+                // Refresh list
+                Cursor cursor = mDbHelper.getListOfTeams();
+                mDataAdapter.swapCursor(cursor);
+            }
+        }
     }
 }
