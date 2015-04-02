@@ -21,14 +21,14 @@ import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
  * <p/>
  * The activity makes heavy use of fragments. The list of items is a
  * {@link TeamListFragment} and the item details
- * (if present) is a {@link TeamDetailFragment}.
+ * (if present) is a {@link TeamPlayersDetailFragment}.
  * <p/>
  * This activity also implements the required
  * {@link TeamListFragment.Callbacks} interface
  * to listen for item selections.
  */
 public class PlayerListActivity extends FragmentActivity
-        implements TeamListFragment.Callbacks, TeamDetailFragment.Callbacks {
+        implements TeamListFragment.Callbacks, TeamPlayersDetailFragment.Callbacks {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -138,11 +138,10 @@ public class PlayerListActivity extends FragmentActivity
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(TeamDetailFragment.ARG_ITEM_ID, id);
-            TeamDetailFragment fragment = new TeamDetailFragment();
+            arguments.putString(TeamPlayersDetailFragment.ARG_ITEM_ID, id);
+            TeamPlayersDetailFragment fragment = new TeamPlayersDetailFragment();
             fragment.setArguments(arguments);
-            int teamId = Integer.parseInt(id);
-            Cursor cursor = mDbHelper.getPlayersOfTeam(teamId);
+            Cursor cursor = mDbHelper.getPlayersOfTeam(mSelectedTeamId);
             fragment.setDataSource(cursor);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.player_detail_container, fragment)
@@ -152,19 +151,21 @@ public class PlayerListActivity extends FragmentActivity
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, PlayerDetailActivity.class);
-            detailIntent.putExtra(TeamDetailFragment.ARG_ITEM_ID, id);
+            detailIntent.putExtra(TeamPlayersDetailFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
         }
     }
 
     @Override
-    public void onItemAdded(String num, String name) {
+    public Cursor onItemAdded(String num, String name) {
         // Add player to DB
         try {
             int playerNum = Integer.parseInt(num);
             mDbHelper.addPlayer(mSelectedTeamId, playerNum, name);
+            return mDbHelper.getPlayersOfTeam(mSelectedTeamId);
         } catch (NumberFormatException nfe) {
             Toast.makeText(this, num + " is not number.", Toast.LENGTH_SHORT);
+            return null;
         }
     }
 }
