@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -29,11 +30,12 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
     private Button btnCalendar, btnTimePicker;
     private EditText txtDate, txtTime;
     private DbHelper mDbHelper;
-    private Cursor mTeamsCursor;
-    private ListView mlvTeams;
+    private Cursor mTeamsCursor, mPlayersCursor;
+    private ListView mlvTeams, mlvPlayers;
     private Spinner mspnTeams;
     // Variable for storing current date and time
     private int mYear, mMonth, mDay, mHour, mMinute;
+    private android.widget.SimpleCursorAdapter mPlayersDataAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +53,25 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         //
         mlvTeams = (ListView) findViewById(R.id.listViewTeams);
         mlvTeams.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        // When team selected, fill players list with players from team
+        mlvTeams.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get _id of selected team
+                Cursor c = ((SimpleCursorAdapter) mlvTeams.getAdapter()).getCursor();
+                c.moveToPosition(position);
+                int teamId = c.getInt(0);
+                Cursor newPlayersCursor = mDbHelper.getPlayersOfTeam(teamId);
+                mPlayersDataAdapter.swapCursor(newPlayersCursor);
+            }
+        });
         mspnTeams = (Spinner) findViewById(R.id.spinnerTeam);
+        mlvPlayers = (ListView) findViewById(R.id.listViewPlayersOfTeam);
+        //mlvPlayers.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
+        mPlayersDataAdapter = new android.widget.SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
+                , null, new String[]{DbHelper.Player.COL_NUMBER, DbHelper.Player.COL_NAME}, bindTo, 0);
+        mlvPlayers.setAdapter(mPlayersDataAdapter);
         //
         mDbHelper = new DbHelper(this);
         // Get starting intent

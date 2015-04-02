@@ -41,7 +41,7 @@ public class DbHelper extends SQLiteOpenHelper {
      */
     public Cursor getListOfTeams() {
         Log.d(Consts.TAG, "DbHelper#getListOfTeams()");
-        Cursor cursor = mDb.query(Team.TEAM_TABLE, Team.COLUMNS, null, null, null, null, null);
+        Cursor cursor = mDb.query(Team.TEAM_TABLE, Team.COLUMNS, null, null, null, null, Team.COL_NAME);
         if (cursor != null)
             cursor.moveToFirst();
         return cursor;
@@ -51,7 +51,8 @@ public class DbHelper extends SQLiteOpenHelper {
         Cursor cursor = mDb.query(Player.TABLE_NAME, Player.COLUMNS,
                 Player.COL_TEAM_ID + "=?",
                 new String[]{"" + teamId},
-                null, null, null);
+                null, null,
+                Player.COL_NUMBER);
         if (cursor != null)
             cursor.moveToFirst();
         return cursor;
@@ -115,6 +116,7 @@ public class DbHelper extends SQLiteOpenHelper {
         public static final String COL_NUMBER = "player_number";
         public static final String COL_NAME = "player_name";
         public static final String[] COLUMNS = {COL_ID, COL_TEAM_ID, COL_NUMBER, COL_NAME};
+        //public static final String[] ORDER_BY_NUMBER = {COL_NUMBER};
         //CREATE TABLE player (_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, team_id INTEGER NOT NULL, player_name VARCHAR (20) NOT NULL);
         static final String SQL_CREATE_TABLE = "create table if not exists "
                 + TABLE_NAME + "(" + COL_ID + " integer primary key autoincrement,"
