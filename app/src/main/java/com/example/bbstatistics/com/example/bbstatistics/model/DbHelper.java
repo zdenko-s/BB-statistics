@@ -8,6 +8,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.example.bbstatistics.Consts;
+import com.example.bbstatistics.NewGame;
+
+import java.util.Date;
 
 
 public class DbHelper extends SQLiteOpenHelper {
@@ -42,6 +45,18 @@ public class DbHelper extends SQLiteOpenHelper {
 */
 
     /**
+     * Add team to DB
+     * @param name Name of team
+     * @return _id of newly inserted team.
+     */
+    public long addTeam(String name) {
+        Log.d(Consts.TAG, "Inserting new team '" + name + "'");
+        ContentValues values = new ContentValues();
+        values.put(Team.COL_NAME, name);
+        long id = mDb.insert(Team.TEAM_TABLE, null, values);
+        return id;
+    }
+    /**
      * Get list of teams
      *
      * @return
@@ -53,7 +68,22 @@ public class DbHelper extends SQLiteOpenHelper {
             cursor.moveToFirst();
         return cursor;
     }
-
+    /**
+     * Add player to team
+     * @param teamId _id of team to which player will be added
+     * @param playerNum Player number (Dress)
+     * @param name Name of the player
+     * @return _id of player. Auto generated
+     */
+    public long addPlayer(int teamId, int playerNum, String name) {
+        Log.d(Consts.TAG, "Inserting new player '" + name + "', #:" + playerNum + ", teamId:" + teamId);
+        ContentValues values = new ContentValues();
+        values.put(Player.COL_TEAM_ID, teamId);
+        values.put(Player.COL_NUMBER, playerNum);
+        values.put(Player.COL_NAME, name);
+        long id = mDb.insert(Player.TABLE_NAME, null, values);
+        return id;
+    }
     public Cursor getPlayersOfTeam(int teamId) {
         Cursor cursor = mDb.query(Player.TABLE_NAME, Player.COLUMNS,
                 Player.COL_TEAM_ID + "=?",
@@ -65,22 +95,23 @@ public class DbHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public long addTeam(String name) {
-        Log.d(Consts.TAG, "Inserting new team '" + name + "'");
-        ContentValues values = new ContentValues();
-        values.put(Team.COL_NAME, name);
-        long id = mDb.insert(Team.TEAM_TABLE, null, values);
-        return id;
+
+    public long addGame(int teamId, int opponentTeamId, String dateOfGame, String description) {
+        ContentValues values = new ContentValues(Game.COLUMNS.length - 1);
+        values.put(Game.COL_TEAM_ID, teamId);
+        values.put(Game.COL_OPPONENT_TEAM_ID, opponentTeamId);
+        values.put(Game.COL_DATE_TIME, dateOfGame);
+        values.put(Game.COL_DESCRIPTION, description);
+        long _id = mDb.insert(Game.TABLE_NAME, null, values);
+        return _id;
     }
 
-    public long addPlayer(int teamId, int playerNum, String name) {
-        Log.d(Consts.TAG, "Inserting new player '" + name + "', #:" + playerNum + ", teamId:" + teamId);
-        ContentValues values = new ContentValues();
-        values.put(Player.COL_TEAM_ID, teamId);
-        values.put(Player.COL_NUMBER, playerNum);
-        values.put(Player.COL_NAME, name);
-        long id = mDb.insert(Player.TABLE_NAME, null, values);
-        return id;
+    public Cursor getGames() {
+        Cursor cursor = mDb.query(Game.TABLE_NAME, Game.COLUMNS,
+                null, null, null, null, null);
+        if (cursor != null)
+            cursor.moveToFirst();
+        return cursor;
     }
 
     /**

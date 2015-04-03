@@ -24,7 +24,6 @@
             android:id="@+id/btn_add_team"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/TextView01"
             android:onClick="addTeam"
             android:text="@string/add_team" />
 
@@ -32,8 +31,6 @@
             android:id="@+id/btn_add_player"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@id/btn_add_team"
-            android:layout_toRightOf="@id/btn_add_team"
             android:onClick="addPlayer"
             android:text="@string/add_player" />
 
@@ -41,7 +38,6 @@
             android:id="@+id/btn_add_game"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/btn_add_team"
             android:onClick="addGame"
             android:text="@string/add_game" />
 
@@ -49,14 +45,11 @@
             android:id="@+id/btn_continue_started_game"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/btn_add_team"
-            android:layout_toRightOf="@id/btn_add_game"
             android:text="@string/continue_game" />
     </LinearLayout>
 
     <ListView
         android:id="@+id/listViewTeamsTest"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_below="@id/btn_add_game" />
+        android:layout_height="fill_parent" />
 </LinearLayout>

@@ -37,8 +37,8 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
     private Button btnCalendar, btnTimePicker;
     private EditText txtDate, txtTime;
     private DbHelper mDbHelper;
-    private Cursor mTeamsCursor, mPlayersCursor;
-    private ListView mlvTeams, mlvPlayers;
+    //private Cursor mPlayersCursor;
+    private ListView mlvTeams;
     private Spinner mspnTeams;
     private android.widget.SimpleCursorAdapter mPlayersDataAdapter;
 
@@ -71,17 +71,16 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
             }
         });
         mspnTeams = (Spinner) findViewById(R.id.spinnerTeam);
-        mlvPlayers = (ListView) findViewById(R.id.listViewPlayersOfTeam);
-        mlvPlayers.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        ListView lvPlayers = (ListView) findViewById(R.id.listViewPlayersOfTeam);
+        lvPlayers.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
         mPlayersDataAdapter = new android.widget.SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
                 , null, new String[]{DbHelper.Player.COL_NUMBER, DbHelper.Player.COL_NAME}, bindTo, 0);
-        mlvPlayers.setAdapter(mPlayersDataAdapter);
+        lvPlayers.setAdapter(mPlayersDataAdapter);
         //
         mDbHelper = new DbHelper(this);
         // Get starting intent
-        Intent intent = getIntent();
-
+        //Intent intent = getIntent();
     }
 
     @Override
@@ -95,15 +94,15 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         Log.d(Consts.TAG, "NewGame#onResume()");
         mDbHelper.open();
         // Load data from DB and populate Views
-        mTeamsCursor = mDbHelper.getListOfTeams();
+        Cursor teamsCursor = mDbHelper.getListOfTeams();
         int[] bindTo = new int[]{android.R.id.text1};
         String[] cursorColumns = new String[]{DbHelper.Team.COL_NAME};
         SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_1
-                , mTeamsCursor, cursorColumns, bindTo, 0);
+                , teamsCursor, cursorColumns, bindTo, 0);
         mlvTeams.setAdapter(dataAdapter);
         // Reuse cursor to populate spinner with teams
         SimpleCursorAdapter dataAdapterSpinner = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item
-                , mTeamsCursor, cursorColumns, bindTo, 0);
+                , teamsCursor, cursorColumns, bindTo, 0);
         dataAdapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mspnTeams.setAdapter(dataAdapterSpinner);
     }
@@ -126,6 +125,8 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
     }
 
     public void addGame(View view) {
+        StringBuffer dbgStrBuf = new StringBuffer(128);
+        dbgStrBuf.append("Adding new game. ");
         // Fetch data from UI
         String dateTimeString = getDateTimeDbString();
         if (dateTimeString == null) {
@@ -138,17 +139,36 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         final int checkedItemPos = mlvTeams.getCheckedItemPosition();
         if (checkedItemPos == AdapterView.INVALID_POSITION) {
             Toast.makeText(this, "Team not selected", Toast.LENGTH_SHORT).show();
-            ;
             return;
         }
         Cursor c = ((SimpleCursorAdapter) mlvTeams.getAdapter()).getCursor();
         c.moveToPosition(checkedItemPos);
         int teamId = c.getInt(0);
+        dbgStrBuf.append("Selected teamId:").append(teamId).append(", Team:").append(c.getString(1));
         Log.d(Consts.TAG, "Selected teamId:" + teamId);
+        // Get opponent _id
+        final int selectedOpponentTeamPos = mspnTeams.getSelectedItemPosition();
+        if (selectedOpponentTeamPos == Spinner.INVALID_POSITION) {
+            Toast.makeText(this, "Opponent team not selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        c = ((SimpleCursorAdapter) mlvTeams.getAdapter()).getCursor();
+        c.moveToPosition(selectedOpponentTeamPos);
+        int opponentTeamId = c.getInt(0);
+        dbgStrBuf.append(", opponentId:").append(opponentTeamId).append(",name:").append(c.getString(1));
+        Log.d(Consts.TAG, "Selected opponent teamId:" + opponentTeamId);
+        // Description - optional
+        EditText editDesc = (EditText) findViewById(R.id.description);
+        String desc = editDesc.getText().toString();
+        dbgStrBuf.append(", desc:").append(desc);
+        // Persist to DB
+        long gameId = mDbHelper.addGame(teamId, opponentTeamId, getDateTimeDbString(), desc);
+        dbgStrBuf.append(". ret _id:").append(gameId);
+        Log.v(Consts.TAG, dbgStrBuf.toString());
 
         // Return result
         Intent intent = new Intent();
-        intent.putExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY, "Test");
+        intent.putExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY, gameId);
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -222,13 +242,12 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
 
     /**
      * Show Date or Time picker
-     * @param v
+     * @param v Clicked View
      */
     @Override
     public void onClick(View v) {
         final Calendar c = Calendar.getInstance();
         if (v == btnCalendar) {
-            Date formDate = null;
             // Variable for storing date
             final int mYear, mMonth, mDay;
             final DateFormat dateFormatter = DateFormat.getDateInstance();
@@ -236,7 +255,7 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
             String dateString = txtDate.getText().toString();
             if (dateString.length() > 0) {
                 try {
-                    formDate = dateFormatter.parse(dateString);
+                    Date formDate = dateFormatter.parse(dateString);
                     c.setTime(formDate);
                 } catch (ParseException e) {
                     Log.d(Consts.TAG, "Parsing date failed:" + dateString);
@@ -261,7 +280,6 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
             dpd.show();
         }
         if (v == btnTimePicker) {
-            Date formTime = null;
             // Variable for storing time
             final int hour, minute;
             final DateFormat timeFormatter = DateFormat.getTimeInstance();
@@ -269,7 +287,7 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
             if (timeString.length() > 0) {
                 Log.d(Consts.TAG, "Parsing time:" + timeString);
                 try {
-                    formTime = timeFormatter.parse(timeString);
+                    Date formTime = timeFormatter.parse(timeString);
                     c.setTime(formTime);
                 } catch (ParseException e) {
                     Log.d(Consts.TAG, "Parsing time failed:" + timeString);

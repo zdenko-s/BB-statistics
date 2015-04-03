@@ -34,6 +34,7 @@ public class StartupActivity extends Activity {
     SimpleCursorAdapter mDataAdapter;
     private DbHelper mDbHelper;
     private ListView mlvGames;
+    private boolean mActivityResultOk = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,7 @@ public class StartupActivity extends Activity {
         // Create Adapter
         int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
         mDataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
-                , null, DbHelper.Team.COLUMNS, bindTo, 0);
+                , null, new String[] {DbHelper.Game.COL_DATE_TIME, DbHelper.Game.COL_DESCRIPTION}, bindTo, 0);
         mlvGames.setAdapter(mDataAdapter);
         mlvGames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -112,11 +113,13 @@ public class StartupActivity extends Activity {
         //*
         mDbHelper.open();
         // Display list of games in list
-        Cursor teamsCursor = mDbHelper.getListOfTeams();
+        Cursor gamesCursor = mDbHelper.getGames();
         //int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
         //mDataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
         //        , teamsCursor, DbHelper.Team.COLUMNS, bindTo, 0);
-        Cursor oldCursor = mDataAdapter.swapCursor(teamsCursor);
+        Cursor oldCursor = mDataAdapter.swapCursor(gamesCursor);
+        if(oldCursor != null && !oldCursor.isClosed())
+            oldCursor.close();
         //mlvGames.setAdapter(mDataAdapter);
         //*/
     }
@@ -225,8 +228,9 @@ public class StartupActivity extends Activity {
         if (resultCode == RESULT_OK) {
             // check if the request code is same as what is passed
             if (requestCode == Consts.ACTIVITY_REQUEST_NEW_GAME) {
-                String message = data.getStringExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY);
-                Log.d(Consts.TAG, "StartupActivity.onActivityResult (NewGame):" + message);
+                long gameId = data.getLongExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY, -1);
+                Log.d(Consts.TAG, "StartupActivity.onActivityResult (NewGame _id):" + gameId);
+                mActivityResultOk = true;
                 // Refresh list
                 //Cursor cursor = mDbHelper.getListOfTeams();
                 //mDataAdapter.swapCursor(cursor);
