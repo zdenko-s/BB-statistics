@@ -26,9 +26,16 @@ public class DbHelper extends SQLiteOpenHelper {
      * Open SQLite database
      */
     public void open() {
+        Log.d(Consts.TAG, "DbHelper#open()");
         mDb = super.getWritableDatabase();
     }
-/*
+
+    @Override
+    public synchronized void close() {
+        Log.d(Consts.TAG, "DbHelper#close()");
+        super.close();
+    }
+    /*
     public SQLiteDatabase getDb() {
         return mDb;
     }
@@ -58,20 +65,22 @@ public class DbHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public void addTeam(String name) {
+    public long addTeam(String name) {
         Log.d(Consts.TAG, "Inserting new team '" + name + "'");
         ContentValues values = new ContentValues();
         values.put(Team.COL_NAME, name);
         long id = mDb.insert(Team.TEAM_TABLE, null, values);
+        return id;
     }
 
-    public void addPlayer(int teamId, int playerNum, String name) {
+    public long addPlayer(int teamId, int playerNum, String name) {
         Log.d(Consts.TAG, "Inserting new player '" + name + "', #:" + playerNum + ", teamId:" + teamId);
         ContentValues values = new ContentValues();
         values.put(Player.COL_TEAM_ID, teamId);
         values.put(Player.COL_NUMBER, playerNum);
         values.put(Player.COL_NAME, name);
         long id = mDb.insert(Player.TABLE_NAME, null, values);
+        return id;
     }
 
     /**

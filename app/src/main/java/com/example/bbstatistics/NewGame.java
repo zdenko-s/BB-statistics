@@ -18,13 +18,16 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 
 public class NewGame extends ActionBarActivity implements View.OnClickListener {
@@ -89,6 +92,7 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(Consts.TAG, "NewGame#onResume()");
         mDbHelper.open();
         // Load data from DB and populate Views
         mTeamsCursor = mDbHelper.getListOfTeams();
@@ -106,6 +110,7 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
 
     @Override
     protected void onPause() {
+        Log.d(Consts.TAG, "NewGame#onPause()");
         super.onPause();
         mDbHelper.close();
     }
@@ -122,6 +127,25 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
 
     public void addGame(View view) {
         // Fetch data from UI
+        String dateTimeString = getDateTimeDbString();
+        if (dateTimeString == null) {
+            Toast.makeText(this, "Missing date/time", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Log.d(Consts.TAG, "Date/time in DB format:" + dateTimeString);
+        // Get teamID from selection
+        //final int selectedTeamListPos = mlvTeams.getSelectedItemPosition();
+        final int checkedItemPos = mlvTeams.getCheckedItemPosition();
+        if (checkedItemPos == AdapterView.INVALID_POSITION) {
+            Toast.makeText(this, "Team not selected", Toast.LENGTH_SHORT).show();
+            ;
+            return;
+        }
+        Cursor c = ((SimpleCursorAdapter) mlvTeams.getAdapter()).getCursor();
+        c.moveToPosition(checkedItemPos);
+        int teamId = c.getInt(0);
+        Log.d(Consts.TAG, "Selected teamId:" + teamId);
+
         // Return result
         Intent intent = new Intent();
         intent.putExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY, "Test");
@@ -152,8 +176,52 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
     }
 
     /**
+     * Get date/time from UI and convert it to DB format
+     * @return String presentation of entered Date and time
+     */
+    private String getDateTimeDbString() {
+        Calendar c = Calendar.getInstance();
+        // Date
+        String dateString = txtDate.getText().toString();
+        DateFormat dateFormatter = DateFormat.getDateInstance();
+        if (dateString.length() > 0) {
+            try {
+                Date formDate = dateFormatter.parse(dateString);
+                c.setTime(formDate);
+            } catch (ParseException e) {
+                Log.d(Consts.TAG, "Parsing date failed:" + dateString);
+                Toast.makeText(this, R.string.err_invalid_date, Toast.LENGTH_SHORT).show();
+                return null;
+            }
+        } else {
+            Toast.makeText(this, R.string.err_missing_date, Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        SimpleDateFormat dbDateFormatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String formattedDate = dbDateFormatter.format(c.getTime());
+        // Time
+        String timeString = txtTime.getText().toString();
+        DateFormat timeFormatter = DateFormat.getTimeInstance();
+        if (timeString.length() > 0) {
+            Log.d(Consts.TAG, "Parsing time:" + timeString);
+            try {
+                Date formTime = timeFormatter.parse(timeString);
+                c.setTime(formTime);
+            } catch (ParseException e) {
+                Toast.makeText(this, R.string.err_invalid_time, Toast.LENGTH_SHORT).show();
+                Log.d(Consts.TAG, "Parsing time failed:" + timeString);
+            }
+        } else {
+            Toast.makeText(this, R.string.err_missing_time, Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        SimpleDateFormat dbTimeFormatter = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        String formattedTime = dbTimeFormatter.format(c.getTime());
+        return formattedDate + " " + formattedTime;
+    }
+
+    /**
      * Show Date or Time picker
-     *
      * @param v
      */
     @Override
@@ -163,12 +231,12 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
             Date formDate = null;
             // Variable for storing date
             final int mYear, mMonth, mDay;
-            final DateFormat dateFormater = DateFormat.getDateInstance();
+            final DateFormat dateFormatter = DateFormat.getDateInstance();
             // Parse date present in EditText date
             String dateString = txtDate.getText().toString();
             if (dateString.length() > 0) {
                 try {
-                    formDate = dateFormater.parse(dateString);
+                    formDate = dateFormatter.parse(dateString);
                     c.setTime(formDate);
                 } catch (ParseException e) {
                     Log.d(Consts.TAG, "Parsing date failed:" + dateString);
@@ -186,8 +254,8 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
                         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                             // Display Selected date in textbox
                             c.set(year, monthOfYear, dayOfMonth);
-                            String formatedDate = dateFormater.format(c.getTime());
-                            txtDate.setText(formatedDate);
+                            String formattedDate = dateFormatter.format(c.getTime());
+                            txtDate.setText(formattedDate);
                         }
                     }, mYear, mMonth, mDay);
             dpd.show();
@@ -196,12 +264,12 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
             Date formTime = null;
             // Variable for storing time
             final int hour, minute;
-            final DateFormat timeFormater = DateFormat.getTimeInstance();
+            final DateFormat timeFormatter = DateFormat.getTimeInstance();
             String timeString = txtTime.getText().toString();
             if (timeString.length() > 0) {
                 Log.d(Consts.TAG, "Parsing time:" + timeString);
                 try {
-                    formTime = timeFormater.parse(timeString);
+                    formTime = timeFormatter.parse(timeString);
                     c.setTime(formTime);
                 } catch (ParseException e) {
                     Log.d(Consts.TAG, "Parsing time failed:" + timeString);
@@ -219,8 +287,8 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
                             // Display Selected time in textbox
                             c.set(Calendar.HOUR_OF_DAY, hourOfDay);
                             c.set(Calendar.MINUTE, minuteOfHour);
-                            String formatedTime = timeFormater.format(c.getTime());
-                            txtTime.setText(formatedTime);
+                            String formattedTime = timeFormatter.format(c.getTime());
+                            txtTime.setText(formattedTime);
                         }
                     }, hour, minute, true);
             tpd.show();

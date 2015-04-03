@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="err_invalid_date">Invalid date format</string>
+    <string name="err_missing_date">Missing date</string>
+    <string name="err_invalid_time">Invalid time format</string>
+    <string name="err_missing_time">Missing time</string>
+</resources>

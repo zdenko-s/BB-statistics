@@ -212,7 +212,7 @@ public class StartupActivity extends Activity {
     }
 
     /**
-     * Return point from child activity
+     * Return point from child activity. NOTE: This is called before onResume()
      *
      * @param requestCode
      * @param resultCode
@@ -221,15 +221,15 @@ public class StartupActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(Consts.TAG, "onActivityResult(), requestCode:" + requestCode + ", resultCode:" + resultCode);
+        Log.d(Consts.TAG, "StartupActivity.onActivityResult(), requestCode:" + requestCode + ", resultCode:" + resultCode);
         if (resultCode == RESULT_OK) {
             // check if the request code is same as what is passed
             if (requestCode == Consts.ACTIVITY_REQUEST_NEW_GAME) {
                 String message = data.getStringExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY);
-                Log.d(Consts.TAG, "onActivityResult (NewGame):" + message);
+                Log.d(Consts.TAG, "StartupActivity.onActivityResult (NewGame):" + message);
                 // Refresh list
-                Cursor cursor = mDbHelper.getListOfTeams();
-                mDataAdapter.swapCursor(cursor);
+                //Cursor cursor = mDbHelper.getListOfTeams();
+                //mDataAdapter.swapCursor(cursor);
             }
         }
     }
