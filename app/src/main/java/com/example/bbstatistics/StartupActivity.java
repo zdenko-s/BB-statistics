@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
@@ -13,9 +14,16 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.BBPlayer;
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 
 class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
@@ -45,11 +53,18 @@ public class StartupActivity extends Activity {
         BBPlayer.setContext(getApplicationContext());
         // Setup list, list's event listeners,
         mlvGames = (ListView) findViewById(R.id.listViewTeamsTest);
-        mlvGames.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        //mlvGames.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        //mlvGames.setBackgroundResource(R.drawable.listview_selector);
         // Create Adapter
+        /*
         int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
         mDataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
                 , null, new String[] {DbHelper.Game.COL_DATE_TIME, DbHelper.Game.COL_DESCRIPTION}, bindTo, 0);
+        */
+        int[] bindTo = new int[]{R.id.txtTeamId, R.id.txtDateTime};
+        mDataAdapter = new SimpleCursorAdapter(this, R.layout.row_layout_game
+                , null, new String[] {DbHelper.Game.COL_DATE_TIME, DbHelper.Game.COL_DESCRIPTION}, bindTo, 0);
+
         mlvGames.setAdapter(mDataAdapter);
         mlvGames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -114,13 +129,9 @@ public class StartupActivity extends Activity {
         mDbHelper.open();
         // Display list of games in list
         Cursor gamesCursor = mDbHelper.getGames();
-        //int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
-        //mDataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
-        //        , teamsCursor, DbHelper.Team.COLUMNS, bindTo, 0);
         Cursor oldCursor = mDataAdapter.swapCursor(gamesCursor);
         if(oldCursor != null && !oldCursor.isClosed())
             oldCursor.close();
-        //mlvGames.setAdapter(mDataAdapter);
         //*/
     }
 
@@ -235,6 +246,32 @@ public class StartupActivity extends Activity {
                 //Cursor cursor = mDbHelper.getListOfTeams();
                 //mDataAdapter.swapCursor(cursor);
             }
+        }
+    }
+
+    /**
+     * Export SQLite database to SD card
+     * @param view
+     */
+    public void exportDb(View view) {
+        File sd = Environment.getExternalStorageDirectory();
+        File data = Environment.getDataDirectory();
+        FileChannel source = null;
+        FileChannel destination = null;
+        String currentDBPath = "/data/"+ "com.example.bbstatistics" + "/databases/" + DbHelper.DATABASE_NAME;
+        String backupDBPath = DbHelper.DATABASE_NAME;
+        File currentDB = new File(data, currentDBPath);
+        File backupDB = new File(sd, backupDBPath);
+        try {
+            source = new FileInputStream(currentDB).getChannel();
+            destination = new FileOutputStream(backupDB).getChannel();
+            destination.transferFrom(source, 0, source.size());
+            source.close();
+            destination.close();
+            Toast.makeText(this, "DB Exported!", Toast.LENGTH_LONG).show();
+            Log.v(Consts.TAG, "Db exported to:" + backupDB.getAbsolutePath());
+        } catch(IOException e) {
+            e.printStackTrace();
         }
     }
 }

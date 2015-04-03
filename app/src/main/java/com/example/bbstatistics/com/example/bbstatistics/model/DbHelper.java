@@ -14,7 +14,7 @@ import java.util.Date;
 
 
 public class DbHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "bbstat.db";
+    public static final String DATABASE_NAME = "bbstat.db";
     private static final int DATABASE_VERSION = 1;
     // data
     Context mContext;

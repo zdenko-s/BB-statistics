@@ -38,7 +38,8 @@
                 android:id="@+id/txtDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:inputType="date">
 
                 <requestFocus />
             </EditText>
@@ -73,19 +74,26 @@
                 android:text="Time" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btn_add_game"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:onClick="addGame"
-            android:text="Add game" />
-
         <ListView
             android:id="@+id/listViewTeams"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
+        <LinearLayout
+            style="@android:style/ButtonBar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_add_game"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:onClick="addGame"
+                android:text="@string/add_game" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
