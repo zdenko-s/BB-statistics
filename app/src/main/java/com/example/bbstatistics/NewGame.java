@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,7 +21,10 @@ import android.widget.TimePicker;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 
 
 public class NewGame extends ActionBarActivity implements View.OnClickListener {
@@ -33,8 +37,6 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
     private Cursor mTeamsCursor, mPlayersCursor;
     private ListView mlvTeams, mlvPlayers;
     private Spinner mspnTeams;
-    // Variable for storing current date and time
-    private int mYear, mMonth, mDay, mHour, mMinute;
     private android.widget.SimpleCursorAdapter mPlayersDataAdapter;
 
     @Override
@@ -67,7 +69,7 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         });
         mspnTeams = (Spinner) findViewById(R.id.spinnerTeam);
         mlvPlayers = (ListView) findViewById(R.id.listViewPlayersOfTeam);
-        //mlvPlayers.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        mlvPlayers.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
         mPlayersDataAdapter = new android.widget.SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
                 , null, new String[]{DbHelper.Player.COL_NUMBER, DbHelper.Player.COL_NAME}, bindTo, 0);
@@ -119,6 +121,8 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
     }
 
     public void addGame(View view) {
+        // Fetch data from UI
+        // Return result
         Intent intent = new Intent();
         intent.putExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY, "Test");
         setResult(RESULT_OK, intent);
@@ -147,11 +151,30 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Show Date or Time picker
+     *
+     * @param v
+     */
     @Override
     public void onClick(View v) {
+        final Calendar c = Calendar.getInstance();
         if (v == btnCalendar) {
-            // Process to get Current Date
-            final Calendar c = Calendar.getInstance();
+            Date formDate = null;
+            // Variable for storing date
+            final int mYear, mMonth, mDay;
+            final DateFormat dateFormater = DateFormat.getDateInstance();
+            // Parse date present in EditText date
+            String dateString = txtDate.getText().toString();
+            if (dateString.length() > 0) {
+                try {
+                    formDate = dateFormater.parse(dateString);
+                    c.setTime(formDate);
+                } catch (ParseException e) {
+                    Log.d(Consts.TAG, "Parsing date failed:" + dateString);
+                }
+            }
+            // Get fields needed for DatePickerDialog constructor
             mYear = c.get(Calendar.YEAR);
             mMonth = c.get(Calendar.MONTH);
             mDay = c.get(Calendar.DAY_OF_MONTH);
@@ -162,26 +185,44 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
                         @Override
                         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                             // Display Selected date in textbox
-                            txtDate.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                            c.set(year, monthOfYear, dayOfMonth);
+                            String formatedDate = dateFormater.format(c.getTime());
+                            txtDate.setText(formatedDate);
                         }
                     }, mYear, mMonth, mDay);
             dpd.show();
         }
         if (v == btnTimePicker) {
-            // Process to get Current Time
-            final Calendar c = Calendar.getInstance();
-            mHour = c.get(Calendar.HOUR_OF_DAY);
-            mMinute = c.get(Calendar.MINUTE);
+            Date formTime = null;
+            // Variable for storing time
+            final int hour, minute;
+            final DateFormat timeFormater = DateFormat.getTimeInstance();
+            String timeString = txtTime.getText().toString();
+            if (timeString.length() > 0) {
+                Log.d(Consts.TAG, "Parsing time:" + timeString);
+                try {
+                    formTime = timeFormater.parse(timeString);
+                    c.setTime(formTime);
+                } catch (ParseException e) {
+                    Log.d(Consts.TAG, "Parsing time failed:" + timeString);
+                }
+            }
+            // Process to get Time
+            hour = c.get(Calendar.HOUR_OF_DAY);
+            minute = c.get(Calendar.MINUTE);
 
             // Launch Time Picker Dialog
             TimePickerDialog tpd = new TimePickerDialog(this,
                     new TimePickerDialog.OnTimeSetListener() {
                         @Override
-                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        public void onTimeSet(TimePicker view, int hourOfDay, int minuteOfHour) {
                             // Display Selected time in textbox
-                            txtTime.setText(hourOfDay + ":" + minute);
+                            c.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                            c.set(Calendar.MINUTE, minuteOfHour);
+                            String formatedTime = timeFormater.format(c.getTime());
+                            txtTime.setText(formatedTime);
                         }
-                    }, mHour, mMinute, true);
+                    }, hour, minute, true);
             tpd.show();
         }
     }

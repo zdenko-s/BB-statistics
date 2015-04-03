@@ -45,7 +45,7 @@
 
             <Button
                 android:id="@+id/btnCalendar"
-                android:layout_width="100dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
                 android:text="Calendar" />
@@ -67,7 +67,7 @@
 
             <Button
                 android:id="@+id/btnTimePicker"
-                android:layout_width="100dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
                 android:text="Time" />
@@ -75,7 +75,7 @@
 
         <Button
             android:id="@+id/btn_add_game"
-            android:layout_width="100dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:onClick="addGame"
