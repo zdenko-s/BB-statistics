@@ -61,15 +61,16 @@ public class StartupActivity extends Activity {
         mDataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
                 , null, new String[] {DbHelper.Game.COL_DATE_TIME, DbHelper.Game.COL_DESCRIPTION}, bindTo, 0);
         */
-        int[] bindTo = new int[]{R.id.txtTeamId, R.id.txtDateTime};
+        int[] bindTo = new int[]{R.id.txtGameId, R.id.txtDateTime, R.id.txtTeamName, R.id.txtOpponentTeamName, R.id.txtDescription};
         mDataAdapter = new SimpleCursorAdapter(this, R.layout.row_layout_game
-                , null, new String[] {DbHelper.Game.COL_DATE_TIME, DbHelper.Game.COL_DESCRIPTION}, bindTo, 0);
+                , null, DbHelper.Game.VGAME_COLUMNS, bindTo, 0);
 
         mlvGames.setAdapter(mDataAdapter);
         mlvGames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(Consts.TAG, "onItemClick(); position:" + position + ", id:" + id);
+                view.setSelected(true);
             }
         });
         mlvGames.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -123,8 +124,8 @@ public class StartupActivity extends Activity {
 
     @Override
     protected void onResume() {
+        Log.v(Consts.TAG, "S-StartupActivity.onResume()");
         super.onResume();
-        Log.v(Consts.TAG, "StartupActivity.onResume()");
         //*
         mDbHelper.open();
         // Display list of games in list
@@ -132,7 +133,7 @@ public class StartupActivity extends Activity {
         Cursor oldCursor = mDataAdapter.swapCursor(gamesCursor);
         if(oldCursor != null && !oldCursor.isClosed())
             oldCursor.close();
-        //*/
+        Log.v(Consts.TAG, "E-StartupActivity.onResume()");
     }
 
     @Override
