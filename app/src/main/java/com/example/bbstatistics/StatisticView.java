@@ -70,6 +70,9 @@ public class StatisticView extends View implements View.OnClickListener {
         adjustTextSize();
     }
 
+    /**
+     * Adjust text size to fit into cell
+     */
     private void adjustTextSize() {
         // One more row needed for header row
         mRowHeight = getHeight() / (DATA_ROWS + 1);
@@ -90,13 +93,12 @@ public class StatisticView extends View implements View.OnClickListener {
         // make the text text up 70% of the row height
         float target = (float) mRowHeight * .7f;
         // figure out what textSize setting would create that height of text
-        mTextSize = ((target / h) * 100f);
+        mTextSize = ((target / h) * 100f) * .7f;
         mVerticalPadding = (mRowHeight - mTextSize) / 2;
-        if (Log.isLoggable(Consts.TAG, Log.DEBUG))
-            Log.d(Consts.TAG, "Target text size:" + target + ", RowHeight:" + mRowHeight + ", ColWidth=" + mColWidth + ", size:" + mTextSize);
+        Log.d(Consts.TAG, "Target:" + target + ", RowHeight:" + mRowHeight + ", ColWidth=" + mColWidth + ", TextSize:" + mTextSize);
         // and set it into the paint
         mTextPaint.setTextSize(mTextSize);
-        mHeaderTextPaint.setTextSize(mTextSize * 0.7f);
+        mHeaderTextPaint.setTextSize(mTextSize * 0.6f);
     }
 
     // override onDraw
@@ -110,6 +112,10 @@ public class StatisticView extends View implements View.OnClickListener {
         drawGrid(canvas);
     }
 
+    /**
+     * Draw grid lines.
+     * @param canvas
+     */
     private void drawGrid(Canvas canvas) {
         int w = getWidth();
         int h = getHeight();
@@ -138,6 +144,11 @@ public class StatisticView extends View implements View.OnClickListener {
         }
     }
 
+    /**
+     * When grid touched, find cell and increment/decrement value by one
+     * @param event Type of user motion
+     * @return
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
@@ -180,6 +191,10 @@ public class StatisticView extends View implements View.OnClickListener {
         return true;
     }
 
+    /**
+     * Click on +/- button toggles touch action, either +1 or -1
+     * @param v Button clicked
+     */
     @Override
     public void onClick(View v) {
         switch (v.getId()) {

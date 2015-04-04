@@ -1,6 +1,7 @@
 package com.example.bbstatistics;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -10,6 +11,8 @@ import android.widget.Button;
 
 
 public class Statistic extends Activity {
+
+    private long mGameId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +25,13 @@ public class Statistic extends Activity {
         setContentView(R.layout.activity_statistic);
         addListeners();
         getResources().getStringArray(R.array.bb_column_names);
+        // Get starting intent
+        Intent intent = getIntent();
+        // Show game statistic
+        mGameId = intent.getLongExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, Consts.INVALID_ID);
+        if(mGameId == Consts.INVALID_ID) {
+            return;
+        }
     }
 
     private void addListeners() {

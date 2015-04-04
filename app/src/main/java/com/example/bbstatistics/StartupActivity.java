@@ -77,6 +77,7 @@ public class StartupActivity extends Activity {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(Consts.TAG, "onItemLongClick(); position:" + position + ", id:" + id);
+                startGame(id);
                 return true;
             }
         });
@@ -228,9 +229,17 @@ public class StartupActivity extends Activity {
 
     public void editGame(long gameId) {
         Intent intent = new Intent(this, NewGame.class);
-        intent.putExtra(Consts.ACTIVITY_REQUEST_DATA_EDIT_GAME_KEY, gameId);
+        intent.putExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, gameId);
         startActivityForResult(intent, Consts.ACTIVITY_REQUEST_EDIT_GAME);
     }
+
+    public void startGame(long gameId) {
+        Intent intent = new Intent(this, Statistic.class);
+        intent.putExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, gameId);
+        startActivity(intent);
+        //startActivityForResult(intent, Consts.ACTIVITY_REQUEST_START_GAME);
+    }
+
     /**
      * Return point from child activity. NOTE: This is called before onResume()
      *

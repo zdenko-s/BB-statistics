@@ -85,7 +85,7 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         // Get starting intent
         Intent intent = getIntent();
         // If gameId present, edit game
-        mGameId = intent.getLongExtra(Consts.ACTIVITY_REQUEST_DATA_EDIT_GAME_KEY, Consts.INVALID_ID);
+        mGameId = intent.getLongExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, Consts.INVALID_ID);
         if(mGameId == Consts.INVALID_ID) {
             return;
         }

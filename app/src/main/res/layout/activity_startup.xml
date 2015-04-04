@@ -10,8 +10,7 @@
         android:id="@+id/TextView01"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Basketball statistic!"
-        android:textSize="20dp" />
+        android:text="Basketball statistic!" />
 
     <ListView
         android:id="@+id/lvAllGames"

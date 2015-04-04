@@ -1,44 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="40dp"
     android:background="@drawable/game_list_selector"
     android:focusable="false"
-    android:orientation="horizontal"
-    android:textSize="25sp">
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
 
     <TextView
         android:id="@+id/txtGameId"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:paddingStart="4dp"
+        android:textStyle="italic"
         android:layout_weight="1"
         android:paddingEnd="4dp"/>
 
     <TextView
         android:id="@+id/txtDateTime"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
         android:paddingStart="4dp"
         android:layout_weight="2"
+        android:minHeight="40dp"
         android:paddingEnd="4dp"/>
 
     <TextView
         android:id="@+id/txtTeamName"
         android:layout_width="0dp"
         android:layout_weight="4"
-        android:layout_height="wrap_content" />
+        android:textSize="20sp"
+        android:textStyle="italic|bold"
+        android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/txtOpponentTeamName"
         android:layout_width="0dp"
         android:layout_weight="4"
-        android:layout_height="wrap_content" />
+        android:textStyle="bold"
+        android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/txtDescription"
         android:layout_width="0dp"
         android:layout_weight="10"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>
