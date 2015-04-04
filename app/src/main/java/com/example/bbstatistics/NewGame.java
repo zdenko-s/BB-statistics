@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,6 +34,7 @@ import java.util.Locale;
 public class NewGame extends ActionBarActivity implements View.OnClickListener {
 //public class NewGame extends Activity {
 
+    private long mGameId;  // If editing existing game, this is _id of DB record
     // Widget GUI
     private Button btnCalendar, btnTimePicker;
     private EditText txtDate, txtTime;
@@ -40,7 +42,8 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
     //private Cursor mPlayersCursor;
     private ListView mlvTeams;
     private Spinner mspnTeams;
-    private android.widget.SimpleCursorAdapter mPlayersDataAdapter;
+    private SimpleCursorAdapter mPlayersDataAdapter;
+    private ListView mlvPlayers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,16 +74,23 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
             }
         });
         mspnTeams = (Spinner) findViewById(R.id.spinnerTeam);
-        ListView lvPlayers = (ListView) findViewById(R.id.listViewPlayersOfTeam);
-        lvPlayers.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        mlvPlayers = (ListView) findViewById(R.id.listViewPlayersOfTeam);
+        mlvPlayers.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         int[] bindTo = new int[]{android.R.id.text1, android.R.id.text2};
-        mPlayersDataAdapter = new android.widget.SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
+        mPlayersDataAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_activated_2
                 , null, new String[]{DbHelper.Player.COL_NUMBER, DbHelper.Player.COL_NAME}, bindTo, 0);
-        lvPlayers.setAdapter(mPlayersDataAdapter);
+        mlvPlayers.setAdapter(mPlayersDataAdapter);
         //
         mDbHelper = new DbHelper(this);
         // Get starting intent
-        //Intent intent = getIntent();
+        Intent intent = getIntent();
+        // If gameId present, edit game
+        mGameId = intent.getLongExtra(Consts.ACTIVITY_REQUEST_DATA_EDIT_GAME_KEY, Consts.INVALID_ID);
+        if(mGameId == Consts.INVALID_ID) {
+            return;
+        }
+        // _id of existing game is passed, load it and fill data
+        // TODO: Load existing game
     }
 
     @Override
@@ -163,9 +173,21 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         dbgStrBuf.append(", desc:").append(desc);
         // Persist to DB
         long gameId = mDbHelper.addGame(teamId, opponentTeamId, getDateTimeDbString(), desc);
-        dbgStrBuf.append(". ret _id:").append(gameId);
         Log.v(Consts.TAG, dbgStrBuf.toString());
-
+        dbgStrBuf.append(". ret _id:").append(gameId);
+        // We have Game._id, insert players
+        SparseBooleanArray checked = mlvPlayers.getCheckedItemPositions();
+        if(checked.size() != 0) {
+            SimpleCursorAdapter adapter = (SimpleCursorAdapter)mlvPlayers.getAdapter();
+            c = adapter.getCursor();
+            Long[] playersAtGame = new Long[checked.size()];
+            for(int i = 0; i < checked.size(); i++) {
+                c.moveToPosition(checked.keyAt(i));
+                long playerId = c.getLong(c.getColumnIndex(DbHelper.Player.COL_ID));
+                playersAtGame[i] = playerId;
+            }
+            mDbHelper.addPlayersToGame(gameId, playersAtGame);
+        }
         // Return result
         Intent intent = new Intent();
         intent.putExtra(Consts.ACTIVITY_RESULT_NEW_GAME_KEY, gameId);

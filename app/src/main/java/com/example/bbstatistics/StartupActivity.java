@@ -226,6 +226,11 @@ public class StartupActivity extends Activity {
                 */
     }
 
+    public void editGame(long gameId) {
+        Intent intent = new Intent(this, NewGame.class);
+        intent.putExtra(Consts.ACTIVITY_REQUEST_DATA_EDIT_GAME_KEY, gameId);
+        startActivityForResult(intent, Consts.ACTIVITY_REQUEST_EDIT_GAME);
+    }
     /**
      * Return point from child activity. NOTE: This is called before onResume()
      *
