@@ -148,6 +148,18 @@ public class DbHelper extends SQLiteOpenHelper {
 
     }
 
+    // Add players of game to linking table Player -> Player_Game <- Game
+    public void addPlayersToGame(long gameId, Long[] playersAtGame) {
+        //TODO: Insert one by one players into DB
+        // Each player is single entry in linking table
+        for(int i = 0; i < playersAtGame.length; i++) {
+            ContentValues values = new ContentValues();
+            values.put(PlayerGame.COL_GAME_ID, gameId);
+            values.put(PlayerGame.COL_PLAYER_ID, playersAtGame[i]);
+            mDb.insert(PlayerGame.TABLE_NAME, null, values);
+        }
+    }
+
     /**
      * Metadata related to DB table team
      */

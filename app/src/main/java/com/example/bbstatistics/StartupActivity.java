@@ -52,7 +52,7 @@ public class StartupActivity extends Activity {
         // Init singleton
         BBPlayer.setContext(getApplicationContext());
         // Setup list, list's event listeners,
-        mlvGames = (ListView) findViewById(R.id.listViewTeamsTest);
+        mlvGames = (ListView) findViewById(R.id.lvAllGames);
         //mlvGames.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         //mlvGames.setBackgroundResource(R.drawable.listview_selector);
         // Create Adapter
