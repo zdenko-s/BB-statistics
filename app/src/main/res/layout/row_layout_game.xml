@@ -13,6 +13,7 @@
         android:layout_height="match_parent"
         android:paddingStart="4dp"
         android:textStyle="italic"
+        android:gravity="center_vertical"
         android:layout_weight="1"
         android:paddingEnd="4dp"/>
 
@@ -30,7 +31,7 @@
         android:id="@+id/txtTeamName"
         android:layout_width="0dp"
         android:layout_weight="4"
-        android:textSize="20sp"
+        android:gravity="fill_vertical"
         android:textStyle="italic|bold"
         android:layout_height="match_parent" />
 

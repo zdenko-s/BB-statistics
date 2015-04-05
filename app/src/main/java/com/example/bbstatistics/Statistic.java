@@ -6,13 +6,18 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+
+import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 
 
 public class Statistic extends Activity {
 
     private long mGameId;
+    private DbHelper mDbHelper;
+    private StatisticView mStatisticView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +28,10 @@ public class Statistic extends Activity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistic);
+        mStatisticView = (StatisticView) findViewById(R.id.statisticView);
         addListeners();
         getResources().getStringArray(R.array.bb_column_names);
+        mDbHelper = new DbHelper(this);
         // Get starting intent
         Intent intent = getIntent();
         // Show game statistic
@@ -37,8 +44,7 @@ public class Statistic extends Activity {
     private void addListeners() {
         // Add +/- button listener
         Button buttonPlusMinus = (Button) findViewById(R.id.btn_plus_minus);
-        StatisticView statView = (StatisticView) findViewById(R.id.statisticView);
-        buttonPlusMinus.setOnClickListener(statView);
+        buttonPlusMinus.setOnClickListener(mStatisticView);
     }
 
     @Override
@@ -50,6 +56,8 @@ public class Statistic extends Activity {
     @Override
     protected void onResume() {
         Log.v(Consts.TAG, "Statistic(Activity).onResume()");
+        mDbHelper.open();
+        mStatisticView.setDbHelper(mDbHelper);
         super.onResume();
     }
 
@@ -57,6 +65,7 @@ public class Statistic extends Activity {
     protected void onPause() {
         Log.v(Consts.TAG, "Statistic(Activity).onPause()");
         super.onPause();
+        mDbHelper.close();
     }
 
     @Override
@@ -87,4 +96,13 @@ public class Statistic extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Show dialog where used can choose players to substitute
+     * @param view
+     */
+    public void substitutePlayers(View view) {
+        SubstitutePlayerDialog dlg = new SubstitutePlayerDialog(this);
+        dlg.show();
+        Log.v(Consts.TAG, "SubstituteDialog dismissed by" + (dlg.isIsOkPressed() ? "OK" : "Cancel") );
+    }
 }

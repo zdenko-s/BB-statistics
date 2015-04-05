@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.BBPlayer;
+import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 
 public class StatisticView extends View implements View.OnClickListener {
     private static final int DATA_ROWS = 6;//, COLS = 10;
@@ -29,6 +30,7 @@ public class StatisticView extends View implements View.OnClickListener {
     private TextPaint mTextPaint = new TextPaint(), mHeaderTextPaint = new TextPaint();
     private int[][] data;// = new int[DATA_ROWS][COLS];
     private int mIncrement = 1;
+    private DbHelper mDbHelper;
 
     public StatisticView(Context context) {
         super(context);
@@ -106,8 +108,8 @@ public class StatisticView extends View implements View.OnClickListener {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //canvas.drawBitmap(canvasBitmap, 0, 0, mPaint);
-        //Rect rect = canvas.getClipBounds();
-        //Log.d(Consts.TAG, "onDraw clip bounds:" + rect.toShortString());
+        Rect rect = canvas.getClipBounds();
+        Log.d(Consts.TAG, "StatisticView#onDraw clip bounds:" + rect.toShortString());
         canvas.drawRect(0, 0, getWidth(), getHeight(), mPaint);
         drawGrid(canvas);
     }
@@ -131,14 +133,12 @@ public class StatisticView extends View implements View.OnClickListener {
         }
         // Display column headers
         String[] colHeaders = BBPlayer.getColumnNames();
-        // Display values
+        // Display values in cells
         for (int col = 0; col < BBPlayer.getColumnCount(); col++) {
             int dx = mNameColWidth + col * mColWidth;
-            canvas.drawText(colHeaders[col], dx, mRowHeight, mHeaderTextPaint);
+            canvas.drawText(colHeaders[col], dx, mRowHeight - mVerticalPadding, mHeaderTextPaint);
             for (int row = 0; row < DATA_ROWS; row++) {
                 int dy = (int) (row * mRowHeight + 2 * mRowHeight - mVerticalPadding);
-                //if(row == 0 && col == 0)
-                //    Log.d(Consts.TAG, "drawGrid [0,0]; dx=" + dx + ", dy=" + dy);
                 canvas.drawText("" + data[row][col], dx, dy, mTextPaint);
             }
         }
@@ -210,5 +210,13 @@ public class StatisticView extends View implements View.OnClickListener {
                 pmButton.invalidate();
                 break;
         }
+    }
+
+    /**
+     * Container passes DbHelper instance. Container manages lifetime of DbHelper
+     * @param dbHelper
+     */
+    public void setDbHelper(DbHelper dbHelper) {
+        mDbHelper = dbHelper;
     }
 }
