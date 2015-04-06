@@ -85,8 +85,8 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         // Get starting intent
         Intent intent = getIntent();
         // If gameId present, edit game
-        mGameId = intent.getLongExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, Consts.INVALID_ID);
-        if(mGameId == Consts.INVALID_ID) {
+        mGameId = intent.getLongExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, DbHelper.INVALID_ID);
+        if(mGameId == DbHelper.INVALID_ID) {
             return;
         }
         // _id of existing game is passed, load it and fill data
@@ -134,10 +134,14 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         super.onDestroy();
     }
 
+    /**
+     * Add game to DB.
+     * @param view
+     */
     public void addGame(View view) {
         StringBuffer dbgStrBuf = new StringBuffer(128);
         dbgStrBuf.append("Adding new game. ");
-        // Fetch data from UI
+        // Fetch date/time from UI
         String dateTimeString = getDateTimeDbString();
         if (dateTimeString == null) {
             Toast.makeText(this, "Missing date/time", Toast.LENGTH_SHORT).show();

@@ -125,8 +125,8 @@ public class StartupActivity extends Activity {
 
     @Override
     protected void onResume() {
-        Log.v(Consts.TAG, "S-StartupActivity.onResume()");
         super.onResume();
+        Log.v(Consts.TAG, "S-StartupActivity.onResume()");
         //*
         mDbHelper.open();
         // Display list of games in list

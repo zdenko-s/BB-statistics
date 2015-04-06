@@ -8,9 +8,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.example.bbstatistics.Consts;
+import com.example.bbstatistics.pojo.PlayerGamePojo;
 
 
 public class DbHelper extends SQLiteOpenHelper {
+    public static final long INVALID_ID = -1;
     public static final String DATABASE_NAME = "bbstat.db";
     private static final int DATABASE_VERSION = 1;
     // data
@@ -43,6 +45,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     /**
      * Add team to DB
+     *
      * @param name Name of team
      * @return _id of newly inserted team.
      */
@@ -52,6 +55,7 @@ public class DbHelper extends SQLiteOpenHelper {
         values.put(Team.COL_NAME, name);
         return mDb.insert(Team.TEAM_TABLE, null, values);
     }
+
     /**
      * Get list of teams
      *
@@ -64,11 +68,13 @@ public class DbHelper extends SQLiteOpenHelper {
             cursor.moveToFirst();
         return cursor;
     }
+
     /**
      * Add player to team
-     * @param teamId _id of team to which player will be added
+     *
+     * @param teamId    _id of team to which player will be added
      * @param playerNum Player number (Dress)
-     * @param name Name of the player
+     * @param name      Name of the player
      * @return _id of player. Auto generated
      */
     public long addPlayer(int teamId, int playerNum, String name) {
@@ -82,6 +88,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     /**
      * Get all players of team
+     *
      * @param teamId
      * @return
      */
@@ -98,6 +105,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     /**
      * Adds game
+     *
      * @param teamId
      * @param opponentTeamId
      * @param dateOfGame
@@ -135,12 +143,14 @@ public class DbHelper extends SQLiteOpenHelper {
         Log.d(Consts.TAG, Game.SQL_CREATE_TABLE);
         Log.d(Consts.TAG, Game.SQL_CREATE_VIEW_GAMES);
         Log.d(Consts.TAG, PlayerGame.SQL_CREATE_TABLE);
+        Log.d(Consts.TAG, PlayerGame.SQL_CREATE_VIEW_PG);
 
         db.execSQL(Team.SQL_CREATE_TABLE);
         db.execSQL(Player.SQL_CREATE_TABLE);
         db.execSQL(Game.SQL_CREATE_TABLE);
         db.execSQL(Game.SQL_CREATE_VIEW_GAMES);
         db.execSQL(PlayerGame.SQL_CREATE_TABLE);
+        db.execSQL(PlayerGame.SQL_CREATE_VIEW_PG);
     }
 
     @Override
@@ -152,12 +162,44 @@ public class DbHelper extends SQLiteOpenHelper {
     public void addPlayersToGame(long gameId, Long[] playersAtGame) {
         //TODO: Insert one by one players into DB
         // Each player is single entry in linking table
-        for(int i = 0; i < playersAtGame.length; i++) {
+        for (int i = 0; i < playersAtGame.length; i++) {
             ContentValues values = new ContentValues();
             values.put(PlayerGame.COL_GAME_ID, gameId);
             values.put(PlayerGame.COL_PLAYER_ID, playersAtGame[i]);
             mDb.insert(PlayerGame.TABLE_NAME, null, values);
         }
+    }
+
+    /**
+     * Load data from DB and cache it as POJO objects.
+     *
+     * @param gameId
+     * @return
+     */
+    public PlayerGamePojo[] loadPlayersOfGame(long gameId) {
+        // DB view is sorted by player number
+        Cursor cursor = mDb.query(PlayerGame.V_PLAYER_GAME, PlayerGame.V_COLUMNS,
+                PlayerGame.COL_GAME_ID + "=?",
+                new String[]{"" + gameId},
+                null, null, null);
+        if (cursor != null) {
+            // Size of array is equal to size of cursor
+            PlayerGamePojo[] ret = new PlayerGamePojo[cursor.getCount()];
+            int idx = 0;
+            // Load data from cursor record by record
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                PlayerGamePojo pojo = new PlayerGamePojo(
+                        cursor.getLong(cursor.getColumnIndex(PlayerGame.COL_PLAYER_ID)),
+                        cursor.getInt(cursor.getColumnIndex(Player.COL_NUMBER)),
+                        cursor.getString(cursor.getColumnIndex(Player.COL_NAME))
+                );
+                ret[idx++] = pojo;
+                cursor.moveToNext();
+            }
+            return ret;
+        } else
+            return null;
     }
 
     /**
@@ -224,16 +266,17 @@ public class DbHelper extends SQLiteOpenHelper {
         ORDER BY date_time DESC;
 */
         static final String SQL_CREATE_VIEW_GAMES = "CREATE VIEW IF NOT EXISTS " + VGAME_NAME + " AS \nSELECT g." +
-        COL_ID + ",g." + COL_DATE_TIME + ",t." + Team.COL_NAME + ", oppt." + Team.COL_NAME + " AS " +
-        VCOL_OPP_TEAM_NAME + "," + "g." + COL_DESCRIPTION + "  FROM " + TABLE_NAME +" AS g \n" +
-        "INNER JOIN " + Team.TEAM_TABLE +" AS t ON g." + COL_TEAM_ID + " = t." + Team.COL_ID + " \n" +
-        "INNER JOIN " + Team.TEAM_TABLE +" AS oppt ON g." + COL_OPPONENT_TEAM_ID + " = oppt." +
-        Team.COL_ID + "\n ORDER BY " + COL_DATE_TIME + " DESC;";
+                COL_ID + ",g." + COL_DATE_TIME + ",t." + Team.COL_NAME + ", oppt." + Team.COL_NAME + " AS " +
+                VCOL_OPP_TEAM_NAME + "," + "g." + COL_DESCRIPTION + "  FROM " + TABLE_NAME + " AS g \n" +
+                "INNER JOIN " + Team.TEAM_TABLE + " AS t ON g." + COL_TEAM_ID + " = t." + Team.COL_ID + " \n" +
+                "INNER JOIN " + Team.TEAM_TABLE + " AS oppt ON g." + COL_OPPONENT_TEAM_ID + " = oppt." +
+                Team.COL_ID + "\n ORDER BY " + COL_DATE_TIME + " DESC;";
 
     }
 
     public final static class PlayerGame {
         public static final String TABLE_NAME = "player_game";
+        public static final String V_PLAYER_GAME = "v_player_game";
         public static final String COL_ID = "_id";
         public static final String COL_GAME_ID = "game_id";
         public static final String COL_PLAYER_ID = "player_id";
@@ -245,5 +288,17 @@ public class DbHelper extends SQLiteOpenHelper {
                 + COL_GAME_ID + " integer not null references " + Game.TABLE_NAME + "(" + Game.COL_ID + "),"
                 + COL_PLAYER_ID + " integer not null references " + Player.TABLE_NAME + "(" + Player.COL_ID + "),"
                 + "CONSTRAINT unq_game_id_player_id UNIQUE (" + COL_GAME_ID + ", " + COL_PLAYER_ID + "));";
+        // CREATE VIEW IF NOT EXISTS v_player_game AS SELECT pg._id,pg.game_id,pg.player_id,p.player_number,
+        //p.player_name FROM player_game AS pg INNER JOIN player AS p ON pg.player_id = p._id
+        //INNER JOIN team AS t ON p.team_id = t._id INNER JOIN game AS g ON pg.game_id = g._id
+        // ORDER BY g.date_time DESC, p.player_number ASC;
+        static final String SQL_CREATE_VIEW_PG = "CREATE VIEW IF NOT EXISTS " + V_PLAYER_GAME
+                + " AS\n SELECT pg." + PlayerGame.COL_ID + ",pg." + PlayerGame.COL_GAME_ID + ",pg." + PlayerGame.COL_PLAYER_ID
+                + ",p." + Player.COL_NUMBER + ",p." + Player.COL_NAME + " FROM " + PlayerGame.TABLE_NAME
+                + " AS pg \n INNER JOIN " + Player.TABLE_NAME + " AS p ON pg." + PlayerGame.COL_PLAYER_ID
+                + " = p." + Player.COL_ID + " \n INNER JOIN " + Team.TEAM_TABLE + " AS t ON p." + Player.COL_TEAM_ID
+                + " = t." + Team.COL_ID + " \n INNER JOIN " + Game.TABLE_NAME + " AS g ON pg." + PlayerGame.COL_GAME_ID
+                + " = g." + Game.COL_ID + " \n ORDER BY g." + Game.COL_DATE_TIME + " DESC, p." + Player.COL_NUMBER + " ASC;";
+        public static final String[] V_COLUMNS = {COL_ID, COL_GAME_ID, COL_PLAYER_ID, Player.COL_NUMBER, Player.COL_NAME};
     }
 }

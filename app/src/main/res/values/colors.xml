@@ -3,4 +3,5 @@
     <drawable name="red_color">#ff0000</drawable>
     <drawable name="white_color">#ffffff</drawable>
     <drawable name="orange_color">#ffffbb33</drawable>
+    <color name="Black0Percent">#00000000</color>
 </resources>
