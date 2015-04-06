@@ -14,8 +14,6 @@ import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 import com.example.bbstatistics.pojo.PlayerGamePojo;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Zdenko on 2015-04-05.
@@ -109,7 +107,7 @@ public class SubstitutePlayerDialog extends Dialog {
                 // Add player to temporary list
                 long id = mOnBenchCursor.getLong(mOnBenchCursor.getColumnIndex(DbHelper.PlayerGame.COL_ID));
                 alWillBeOnCourt.add(id);
-                Log.v(Consts.TAG, "To court goes:" + mOnCourtCursor.getColumnIndex(DbHelper.Player.COL_NUMBER));
+                Log.v(Consts.TAG, "To court goes:" + mOnBenchCursor.getInt(mOnCourtCursor.getColumnIndex(DbHelper.Player.COL_NUMBER)));
             }
         }
         // Which players stay on court.
@@ -126,11 +124,13 @@ public class SubstitutePlayerDialog extends Dialog {
         for(int i = 0; i < toBench.size(); i++) {
             if(toBench.get(toBench.keyAt(i), false)) {
                 mOnCourtCursor.moveToPosition(toBench.keyAt(i));
-                long goesToBenchId = mOnCourtCursor.getLong(mOnCourtCursor.getColumnIndex(DbHelper.Player.COL_ID));
+                final long goesToBenchId = mOnCourtCursor.getLong(mOnCourtCursor.getColumnIndex(DbHelper.Player.COL_ID));
                 // Remove selected player from list of players on court
                 boolean removed = alStayOnCourt.remove(goesToBenchId);
-                if (removed)
-                    Log.v(Consts.TAG, "To bench goes:" + mOnCourtCursor.getColumnIndex(DbHelper.Player.COL_NUMBER));
+                if (removed) {
+                    int goesToBenchNum = mOnCourtCursor.getInt(mOnCourtCursor.getColumnIndex(DbHelper.Player.COL_NUMBER));
+                    Log.v(Consts.TAG, "To bench goes:" + goesToBenchNum);
+                }
                 else
                     Log.w(Consts.TAG, "To bench. Not found in mPlayersOnCourt " + goesToBenchId);
             }

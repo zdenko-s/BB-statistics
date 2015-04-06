@@ -69,7 +69,7 @@ public class Statistic extends Activity implements View.OnClickListener {
         super.onResume();
         Log.v(Consts.TAG, "Statistic(Activity)#onResume()");
         mDbHelper.open();
-        mStatisticView.setDbHelper(mDbHelper);
+        //mStatisticView.setDbHelper(mDbHelper);
         // Load players of the game from db
         mPlayers = mDbHelper.loadPlayersOfGame(mGameId);
         if(mPlayers != null) {
@@ -78,6 +78,8 @@ public class Statistic extends Activity implements View.OnClickListener {
             //mPlayersOnBench = new long[mPlayers.length];
             // Allow program to handle more players on court than actually present
             mPlayersOnCourt = new long[mPlayers.length];
+            // Pass Players of game to StatisticView (child view)
+            mStatisticView.setSharedPlayersData(mPlayers, mPlayersOnCourt);
         }
     }
 
@@ -148,7 +150,12 @@ public class Statistic extends Activity implements View.OnClickListener {
         //mDlg = new SubstitutePlayerDialog(this, R.style.CustomDialog, mPlayers, mPlayersOnCourt);
         mDlg = new SubstitutePlayerDialog(this, mPlayers, mPlayersOnCourt);
         mDlg.show();
-        Log.v(Consts.TAG, "SubstituteDialog dismissed by" + (mSubstDialogDismissedByOk ? "OK" : "Cancel"));
+        Log.v(Consts.TAG, "SubstituteDialog dismissed by " + (mSubstDialogDismissedByOk ? "OK" : "Cancel"));
+        if(mSubstDialogDismissedByOk) {
+            // Update statistic grid view with players on court
+            Log.v(Consts.TAG, "substitutePlayers - forcing mStatisticView.invalidate()");
+            mStatisticView.invalidate();
+        }
     }
 
     @Override

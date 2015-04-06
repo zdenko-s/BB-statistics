@@ -1,7 +1,6 @@
 package com.example.bbstatistics;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -15,22 +14,22 @@ import android.widget.Button;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.BBPlayer;
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
+import com.example.bbstatistics.pojo.PlayerGamePojo;
 
 public class StatisticView extends View implements View.OnClickListener {
-    private static final int DATA_ROWS = 6;//, COLS = 10;
+    private static final int DATA_ROWS_ = 6;//, COLS = 10;
     private static final int NAME_COL_WIDTH_MULTYPLIER = 3;//, COLS = 10;
     float mTextSize = 10, mVerticalPadding = 0;
     int mRowHeight, mColWidth;
     //private static final int NAME_COL_WIDTH = 200;
     private int mNameColWidth;
     private Paint mPaint;
-    private int mWidth, mHeight;
-    private Bitmap canvasBitmap;
-    private Canvas drawCanvas;
     private TextPaint mTextPaint = new TextPaint(), mHeaderTextPaint = new TextPaint();
     private int[][] data;// = new int[DATA_ROWS][COLS];
     private int mIncrement = 1;
-    private DbHelper mDbHelper;
+    private PlayerGamePojo[] mPlayersPojo;
+    private long[] mPlayersOnCourt;
+    private int mDataRows;
 
     public StatisticView(Context context) {
         super(context);
@@ -58,17 +57,17 @@ public class StatisticView extends View implements View.OnClickListener {
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeWidth(5f);
         // Get Model from Activity
-        Statistic stat = (Statistic) getContext();
-        data = new int[DATA_ROWS][BBPlayer.getColumnCount()];
+        //Statistic stat = (Statistic) getContext();
+        data = new int[DATA_ROWS_][BBPlayer.getColumnCount()];
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mWidth = w;
-        mHeight = h;
-        canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        drawCanvas = new Canvas(canvasBitmap);
+        //int mWidth = w;
+        //int mHeight = h;
+        //Bitmap canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        //Canvas drawCanvas = new Canvas(canvasBitmap);
         adjustTextSize();
     }
 
@@ -76,8 +75,9 @@ public class StatisticView extends View implements View.OnClickListener {
      * Adjust text size to fit into cell
      */
     private void adjustTextSize() {
+        // Calculate size of text based on 5+1 lines in grid
         // One more row needed for header row
-        mRowHeight = getHeight() / (DATA_ROWS + 1);
+        mRowHeight = getHeight() / (DATA_ROWS_ + 1);
         // Name column is header column
         mNameColWidth = getWidth() / (BBPlayer.getColumnCount() + NAME_COL_WIDTH_MULTYPLIER) * NAME_COL_WIDTH_MULTYPLIER;
         mColWidth = (getWidth() - mNameColWidth) / BBPlayer.getColumnCount();
@@ -97,7 +97,7 @@ public class StatisticView extends View implements View.OnClickListener {
         // figure out what textSize setting would create that height of text
         mTextSize = ((target / h) * 100f) * .7f;
         mVerticalPadding = (mRowHeight - mTextSize) / 2;
-        Log.d(Consts.TAG, "Target:" + target + ", RowHeight:" + mRowHeight + ", ColWidth=" + mColWidth + ", TextSize:" + mTextSize);
+        //Log.d(Consts.TAG, "Target:" + target + ", RowHeight:" + mRowHeight + ", ColWidth=" + mColWidth + ", TextSize:" + mTextSize);
         // and set it into the paint
         mTextPaint.setTextSize(mTextSize);
         mHeaderTextPaint.setTextSize(mTextSize * 0.6f);
@@ -107,25 +107,44 @@ public class StatisticView extends View implements View.OnClickListener {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        //Log.v(Consts.TAG, "StatisticView#onDraw(Canvas canvas)");
+
         //canvas.drawBitmap(canvasBitmap, 0, 0, mPaint);
-        Rect rect = canvas.getClipBounds();
-        Log.d(Consts.TAG, "StatisticView#onDraw clip bounds:" + rect.toShortString());
+//        Rect rect = new Rect();
+//        canvas.getClipBounds(rect);
+//        Log.d(Consts.TAG, "StatisticView#onDraw clip bounds:" + rect.toShortString());
+//        Log.d(Consts.TAG, "StatisticView#onDraw players count:" + rect.toShortString());
         canvas.drawRect(0, 0, getWidth(), getHeight(), mPaint);
         drawGrid(canvas);
     }
 
     /**
      * Draw grid lines.
-     * @param canvas
+     * @param canvas Canvas to draw
      */
     private void drawGrid(Canvas canvas) {
+        logPlayersOnCourt();
+        int playersOnCourtCnt = getPlayersOnCourtCount();
+        mDataRows = Math.max(DATA_ROWS_, playersOnCourtCnt);
         int w = getWidth();
         int h = getHeight();
         //float rowHeight = getHeight() / DATA_ROWS;
         //float colWidth = (getWidth() - NAME_COL_WIDTH) / COLS;
         // Display horizontal lines
-        for (int i = 1; i <= DATA_ROWS; i++) {
+        for (int i = 1; i <= mDataRows; i++) {
             canvas.drawLine(0, i * mRowHeight, w, i * mRowHeight, mPaint);
+            // Display player names
+            long playerId = mPlayersOnCourt[i - 1];
+            if(playerId > 0) {
+                // Get player data from PlayersPojo cache
+                for(int j = 0; j < mPlayersPojo.length; j++) {
+                    if(mPlayersPojo[j].getPlayerId() == playerId) {
+                        String str = mPlayersPojo[j].getPlayerNumber() + mPlayersPojo[j].getPlayerName();
+                        canvas.drawText(str, 0, (i + 1) * mRowHeight - 10, mPaint);
+                        break;
+                    }
+                }
+            }
         }
         // Display vertical lines
         for (int col = 0; col < BBPlayer.getColumnCount(); col++) {
@@ -137,7 +156,7 @@ public class StatisticView extends View implements View.OnClickListener {
         for (int col = 0; col < BBPlayer.getColumnCount(); col++) {
             int dx = mNameColWidth + col * mColWidth;
             canvas.drawText(colHeaders[col], dx, mRowHeight - mVerticalPadding, mHeaderTextPaint);
-            for (int row = 0; row < DATA_ROWS; row++) {
+            for (int row = 0; row < mDataRows; row++) {
                 int dy = (int) (row * mRowHeight + 2 * mRowHeight - mVerticalPadding);
                 canvas.drawText("" + data[row][col], dx, dy, mTextPaint);
             }
@@ -147,7 +166,7 @@ public class StatisticView extends View implements View.OnClickListener {
     /**
      * When grid touched, find cell and increment/decrement value by one
      * @param event Type of user motion
-     * @return
+     * @return true if event consumed
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -164,7 +183,7 @@ public class StatisticView extends View implements View.OnClickListener {
                     row = (int) ((y - mRowHeight) / mRowHeight);
                     Log.d(Consts.TAG, "Touched at col:" + col + ", row:" + row);
                     if (row >= 0 && col >= 0) {
-                        if (row < DATA_ROWS && col < BBPlayer.getColumnCount()) {
+                        if (row < mDataRows && col < BBPlayer.getColumnCount()) {
                             // Is cell data 0? It can't be decremented
                             if (mIncrement < 0 && data[row][col] == 0)
                                 break;
@@ -172,10 +191,11 @@ public class StatisticView extends View implements View.OnClickListener {
                             data[row][col] += mIncrement;
                             Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col]);
                             // Calculate size of rectangle to invalidate
-                            int t = (row + 1) * mRowHeight;
-                            int l = mNameColWidth + col * mColWidth;
+                            //int t = (row + 1) * mRowHeight;
+                            //int l = mNameColWidth + col * mColWidth;
                             //Rect invalidRect = new Rect(l, t, l + mColWidth, t + mRowHeight);
                             //Log.d(Consts.TAG, "Invalidate Rect:" + invalidRect.toShortString());
+                            //Log.v(Consts.TAG, "onTouchEvent - forcing invalidate()");
                             invalidate();
                         }
                     }
@@ -213,10 +233,38 @@ public class StatisticView extends View implements View.OnClickListener {
     }
 
     /**
-     * Container passes DbHelper instance. Container manages lifetime of DbHelper
-     * @param dbHelper
+     * Data shared with parent view. Parent view updates playersOnCourt when Substitute is called
+     * @param playersPojo
+     * @param playersOnCourt
      */
-    public void setDbHelper(DbHelper dbHelper) {
-        mDbHelper = dbHelper;
+    public void setSharedPlayersData(PlayerGamePojo[] playersPojo, long[] playersOnCourt) {
+        mPlayersPojo = playersPojo;
+        mPlayersOnCourt = playersOnCourt;
+    }
+
+    /**
+     * Counts many elements of array ar greater than 0. It is valid PlayerID
+     * @return number of valid IDs in players vector
+     */
+    private int getPlayersOnCourtCount() {
+        int cnt = 0;
+        for(int i = 0; i < mPlayersOnCourt.length; i++) {
+            if(mPlayersOnCourt[i] > 0)
+                cnt++;
+        }
+        return cnt;
+    }
+
+    private void logPlayersOnCourt() {
+        StringBuffer sb = new StringBuffer("Content of mPlayersOnCourt:");
+        for(int i = 0; i < mPlayersOnCourt.length; i++) {
+            if(mPlayersOnCourt[i] != DbHelper.INVALID_ID) {
+                //sb.append(String.format("", mP));
+                sb.append(mPlayersOnCourt[i]).append(",");
+            }
+            else
+                break;
+        }
+        Log.v(Consts.TAG, sb.toString());
     }
 }
