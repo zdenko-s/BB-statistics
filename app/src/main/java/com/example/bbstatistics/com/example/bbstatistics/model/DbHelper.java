@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.example.bbstatistics.Consts;
+import com.example.bbstatistics.Settings;
 import com.example.bbstatistics.pojo.PlayerGamePojo;
 
 
@@ -184,8 +185,13 @@ public class DbHelper extends SQLiteOpenHelper {
                 null, null, null);
         if (cursor != null) {
             // Size of array is equal to size of cursor
-            PlayerGamePojo[] ret = new PlayerGamePojo[cursor.getCount()];
+            PlayerGamePojo[] ret = new PlayerGamePojo[cursor.getCount() + Settings.OpponentRowNum];
             int idx = 0;
+            if(Settings.OpponentRowNum == 1) {
+                PlayerGamePojo pojo = new PlayerGamePojo(0, 100, "Opponent");
+                pojo.setOnCourt(true);
+                ret[idx++] = pojo;
+            }
             // Load data from cursor record by record
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {

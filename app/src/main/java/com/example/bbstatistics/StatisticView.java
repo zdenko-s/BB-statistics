@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Parcelable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -13,23 +14,23 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.bbstatistics.com.example.bbstatistics.model.BBPlayer;
-import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 import com.example.bbstatistics.pojo.PlayerGamePojo;
 
+import java.util.ArrayList;
+
 public class StatisticView extends View implements View.OnClickListener {
-    private static final int DATA_ROWS_ = 6;//, COLS = 10;
-    private static final int NAME_COL_WIDTH_MULTYPLIER = 3;//, COLS = 10;
-    float mTextSize = 10, mVerticalPadding = 0;
-    int mRowHeight, mColWidth;
-    //private static final int NAME_COL_WIDTH = 200;
+    private static final String TAG = "StatisticView";
+    private static final int DATA_ROWS = 6;// Assumed value to calculate size of font to display in grid
+    private static final int NAME_COL_WIDTH_MULTIPLIER = 3;//, COLS = 10;
+    private int mIncrement = 1; // When user touches display, value in cell is incremented by this (either +1 or -1)
+    private float mTextSize = 10, mVerticalPadding = 0;
+    private int mRowHeight, mColWidth;
     private int mNameColWidth;
-    private Paint mPaint;
+    private Paint mLinePaint;
     private TextPaint mTextPaint = new TextPaint(), mHeaderTextPaint = new TextPaint();
-    private int[][] data;// = new int[DATA_ROWS][COLS];
-    private int mIncrement = 1;
-    private PlayerGamePojo[] mPlayersPojo;
-    private long[] mPlayersOnCourt;
-    private int mDataRows;
+    // In memory cached data of players
+    private PlayerGamePojo[] mPlayersPojoCache; // Every player at game
+    private ArrayList<Integer> mPlayersOnCourtIdx = new ArrayList<>(); // Indices of players on court.
 
     public StatisticView(Context context) {
         super(context);
@@ -50,15 +51,15 @@ public class StatisticView extends View implements View.OnClickListener {
     }
 
     private void init() {
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setColor(Color.YELLOW);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setStrokeJoin(Paint.Join.ROUND);
-        mPaint.setStrokeWidth(5f);
+        mLinePaint = new Paint();
+        mLinePaint.setAntiAlias(true);
+        mLinePaint.setColor(Color.YELLOW);
+        mLinePaint.setStyle(Paint.Style.STROKE);
+        mLinePaint.setStrokeJoin(Paint.Join.ROUND);
+        mLinePaint.setStrokeWidth(5f);
         // Get Model from Activity
         //Statistic stat = (Statistic) getContext();
-        data = new int[DATA_ROWS_][BBPlayer.getColumnCount()];
+        //data = new int[DATA_ROWS_][BBPlayer.getColumnCount()];
     }
 
     @Override
@@ -75,11 +76,11 @@ public class StatisticView extends View implements View.OnClickListener {
      * Adjust text size to fit into cell
      */
     private void adjustTextSize() {
-        // Calculate size of text based on 5+1 lines in grid
+        // Calculate size of text based on 6+1 lines in grid
         // One more row needed for header row
-        mRowHeight = getHeight() / (DATA_ROWS_ + 1);
+        mRowHeight = getHeight() / Math.max( (DATA_ROWS + 1), mPlayersOnCourtIdx.size() );
         // Name column is header column
-        mNameColWidth = getWidth() / (BBPlayer.getColumnCount() + NAME_COL_WIDTH_MULTYPLIER) * NAME_COL_WIDTH_MULTYPLIER;
+        mNameColWidth = getWidth() / (BBPlayer.getColumnCount() + NAME_COL_WIDTH_MULTIPLIER) * NAME_COL_WIDTH_MULTIPLIER;
         mColWidth = (getWidth() - mNameColWidth) / BBPlayer.getColumnCount();
         // Set Paint properties
         mHeaderTextPaint.setColor(Color.BLUE);
@@ -109,62 +110,58 @@ public class StatisticView extends View implements View.OnClickListener {
         super.onDraw(canvas);
         //Log.v(Consts.TAG, "StatisticView#onDraw(Canvas canvas)");
 
-        //canvas.drawBitmap(canvasBitmap, 0, 0, mPaint);
+        //canvas.drawBitmap(canvasBitmap, 0, 0, mLinePaint);
 //        Rect rect = new Rect();
 //        canvas.getClipBounds(rect);
 //        Log.d(Consts.TAG, "StatisticView#onDraw clip bounds:" + rect.toShortString());
 //        Log.d(Consts.TAG, "StatisticView#onDraw players count:" + rect.toShortString());
-        canvas.drawRect(0, 0, getWidth(), getHeight(), mPaint);
+        canvas.drawRect(0, 0, getWidth(), getHeight(), mLinePaint);
         drawGrid(canvas);
     }
 
     /**
      * Draw grid lines.
+     *
      * @param canvas Canvas to draw
      */
     private void drawGrid(Canvas canvas) {
         logPlayersOnCourt();
-        int playersOnCourtCnt = getPlayersOnCourtCount();
-        mDataRows = Math.max(DATA_ROWS_, playersOnCourtCnt);
+        int dataRowsCount = mPlayersOnCourtIdx.size();
         int w = getWidth();
         int h = getHeight();
         //float rowHeight = getHeight() / DATA_ROWS;
         //float colWidth = (getWidth() - NAME_COL_WIDTH) / COLS;
         // Display horizontal lines
-        for (int i = 1; i <= mDataRows; i++) {
-            canvas.drawLine(0, i * mRowHeight, w, i * mRowHeight, mPaint);
+        for (int i = 0; i < dataRowsCount; i++) {
+            canvas.drawLine(0, (i + 1) * mRowHeight, w, (i + 1) * mRowHeight, mLinePaint);
             // Display player names
-            long playerId = mPlayersOnCourt[i - 1];
-            if(playerId > 0) {
-                // Get player data from PlayersPojo cache
-                for(int j = 0; j < mPlayersPojo.length; j++) {
-                    if(mPlayersPojo[j].getPlayerId() == playerId) {
-                        String str = mPlayersPojo[j].getPlayerNumber() + mPlayersPojo[j].getPlayerName();
-                        canvas.drawText(str, 0, (i + 1) * mRowHeight - 10, mPaint);
-                        break;
-                    }
-                }
+            int playerIdx = mPlayersOnCourtIdx.get(i);
+            if (playerIdx <= mPlayersPojoCache.length) {
+                PlayerGamePojo p = mPlayersPojoCache[playerIdx];
+                String str = p.getPlayerNumber() + ":" + p.getPlayerName();
+                canvas.drawText(str, 0, (i + 2) * mRowHeight - 10, mHeaderTextPaint);
             }
         }
         // Display vertical lines
         for (int col = 0; col < BBPlayer.getColumnCount(); col++) {
-            canvas.drawLine(mNameColWidth + col * mColWidth, 0, mNameColWidth + col * mColWidth, h, mPaint);
+            canvas.drawLine(mNameColWidth + col * mColWidth, 0, mNameColWidth + col * mColWidth, h, mLinePaint);
         }
-        // Display column headers
         String[] colHeaders = BBPlayer.getColumnNames();
-        // Display values in cells
         for (int col = 0; col < BBPlayer.getColumnCount(); col++) {
             int dx = mNameColWidth + col * mColWidth;
+            // Display column headers
             canvas.drawText(colHeaders[col], dx, mRowHeight - mVerticalPadding, mHeaderTextPaint);
-            for (int row = 0; row < mDataRows; row++) {
-                int dy = (int) (row * mRowHeight + 2 * mRowHeight - mVerticalPadding);
-                canvas.drawText("" + data[row][col], dx, dy, mTextPaint);
-            }
+//            for (int row = 0; row < mDataRows; row++) {
+//                int dy = (int) (row * mRowHeight + 2 * mRowHeight - mVerticalPadding);
+//                // Display values in cells
+//                canvas.drawText("" + data[row][col], dx, dy, mTextPaint);
+//            }
         }
     }
 
     /**
      * When grid touched, find cell and increment/decrement value by one
+     *
      * @param event Type of user motion
      * @return true if event consumed
      */
@@ -173,6 +170,7 @@ public class StatisticView extends View implements View.OnClickListener {
         float x = event.getX();
         float y = event.getY();
         int row, col;
+        final int dataRowsCount = mPlayersOnCourtIdx.size();
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -183,13 +181,13 @@ public class StatisticView extends View implements View.OnClickListener {
                     row = (int) ((y - mRowHeight) / mRowHeight);
                     Log.d(Consts.TAG, "Touched at col:" + col + ", row:" + row);
                     if (row >= 0 && col >= 0) {
-                        if (row < mDataRows && col < BBPlayer.getColumnCount()) {
+                        if (row < dataRowsCount && col < BBPlayer.getColumnCount()) {
                             // Is cell data 0? It can't be decremented
-                            if (mIncrement < 0 && data[row][col] == 0)
-                                break;
-                            //Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col] + ". Inc:" + mIncrement);
-                            data[row][col] += mIncrement;
-                            Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col]);
+//                            if (mIncrement < 0 && data[row][col] == 0)
+//                                break;
+//                            //Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col] + ". Inc:" + mIncrement);
+//                            data[row][col] += mIncrement;
+//                            Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col]);
                             // Calculate size of rectangle to invalidate
                             //int t = (row + 1) * mRowHeight;
                             //int l = mNameColWidth + col * mColWidth;
@@ -208,11 +206,13 @@ public class StatisticView extends View implements View.OnClickListener {
             case MotionEvent.ACTION_UP:
                 break;
         }
+        invalidate();
         return true;
     }
 
     /**
      * Click on +/- button toggles touch action, either +1 or -1
+     *
      * @param v Button clicked
      */
     @Override
@@ -233,38 +233,45 @@ public class StatisticView extends View implements View.OnClickListener {
     }
 
     /**
-     * Data shared with parent view. Parent view updates playersOnCourt when Substitute is called
+     * Data shared with parent activity. SubstituteDialog updates OnCourt values when Substitute is called
+     *
      * @param playersPojo
-     * @param playersOnCourt
      */
-    public void setSharedPlayersData(PlayerGamePojo[] playersPojo, long[] playersOnCourt) {
-        mPlayersPojo = playersPojo;
-        mPlayersOnCourt = playersOnCourt;
+    public void setSharedPlayersData(PlayerGamePojo[] playersPojo) {
+        mPlayersPojoCache = playersPojo;
+        for(int i : mPlayersOnCourtIdx) {
+            mPlayersPojoCache[i].setOnCourt(true);
+        }
     }
 
     /**
-     * Counts many elements of array ar greater than 0. It is valid PlayerID
-     * @return number of valid IDs in players vector
+     * mGridData array contains indices of data in PlayerGamePojo array. PlayerGamePojo holds data for every player
+     * mGridData contains indices of players on court. Data of those players is displayed in grid.
+     * mGridData is updated with every substitution. Data on screen will be displayed in order as in mGriData.
+     * mGridData
      */
-    private int getPlayersOnCourtCount() {
-        int cnt = 0;
-        for(int i = 0; i < mPlayersOnCourt.length; i++) {
-            if(mPlayersOnCourt[i] > 0)
-                cnt++;
-        }
-        return cnt;
+    private void setGridDataIndices() {
+
     }
 
-    private void logPlayersOnCourt() {
+    public void logPlayersOnCourt() {
         StringBuffer sb = new StringBuffer("Content of mPlayersOnCourt:");
-        for(int i = 0; i < mPlayersOnCourt.length; i++) {
-            if(mPlayersOnCourt[i] != DbHelper.INVALID_ID) {
-                //sb.append(String.format("", mP));
-                sb.append(mPlayersOnCourt[i]).append(",");
-            }
-            else
-                break;
+        for (Integer l : mPlayersOnCourtIdx) {
+            sb.append(l).append(",");
         }
         Log.v(Consts.TAG, sb.toString());
+    }
+
+    /**
+     * Refill list of players on court and redraw grid
+     */
+    public void redraw() {
+        mPlayersOnCourtIdx.clear();
+        for (int i = 0; i < mPlayersPojoCache.length; i++) {
+            if (mPlayersPojoCache[i].isOnCourt())
+                mPlayersOnCourtIdx.add(i);  // Index is added for direct array access
+        }
+        logPlayersOnCourt();
+        invalidate();
     }
 }

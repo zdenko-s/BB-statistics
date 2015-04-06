@@ -13,18 +13,19 @@ import android.widget.Button;
 import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
 import com.example.bbstatistics.pojo.PlayerGamePojo;
 
+import java.util.ArrayList;
+
 
 public class Statistic extends Activity implements View.OnClickListener {
-
+    // In memory cache of player data. Sorted by dress number. First row may contain opponent team data.
+    // (Depending on user preferences)
     private PlayerGamePojo[] mPlayers;
-    private int mPlayerCount;
 
     private final static class PersistenceKeys {
         static final String PLAYERS_ON_COURT = "court";
         static final String PLAYERS_ON_BENCH = "bench";
     }
     private long mGameId;
-    private long[] mPlayersOnCourt;//, mPlayersOnBench;
     private DbHelper mDbHelper;
     private StatisticView mStatisticView;
     private SubstitutePlayerDialog mDlg;
@@ -62,6 +63,7 @@ public class Statistic extends Activity implements View.OnClickListener {
     protected void onStart() {
         super.onStart();
         Log.v(Consts.TAG, "Statistic(Activity#onStart()");
+        mStatisticView.logPlayersOnCourt();
     }
 
     @Override
@@ -69,17 +71,12 @@ public class Statistic extends Activity implements View.OnClickListener {
         super.onResume();
         Log.v(Consts.TAG, "Statistic(Activity)#onResume()");
         mDbHelper.open();
-        //mStatisticView.setDbHelper(mDbHelper);
         // Load players of the game from db
         mPlayers = mDbHelper.loadPlayersOfGame(mGameId);
         if(mPlayers != null) {
-            mPlayerCount = mPlayers.length;
-            // Optimize. Allocate max size of arrays
-            //mPlayersOnBench = new long[mPlayers.length];
-            // Allow program to handle more players on court than actually present
-            mPlayersOnCourt = new long[mPlayers.length];
+            // TODO: If Content of mPlayersOnCourt is not empty, restore "on court state"
             // Pass Players of game to StatisticView (child view)
-            mStatisticView.setSharedPlayersData(mPlayers, mPlayersOnCourt);
+            mStatisticView.setSharedPlayersData(mPlayers);
         }
     }
 
@@ -88,9 +85,8 @@ public class Statistic extends Activity implements View.OnClickListener {
         super.onRestoreInstanceState(savedInstanceState);
         Log.v(Consts.TAG, "Statistic(Activity)#onRestoreInstanceState()");
         if(savedInstanceState != null) {
-            //
-            mPlayersOnCourt = savedInstanceState.getLongArray(PersistenceKeys.PLAYERS_ON_COURT);
-            //mPlayersOnBench = savedInstanceState.getLongArray(PersistenceKeys.PLAYERS_ON_BENCH);
+            Log.v(Consts.TAG, "Statistic(Activity)#onRestoreInstanceState(): saved state present");
+            //mPlayersOnCourt = savedInstanceState.getLongArray(PersistenceKeys.PLAYERS_ON_COURT);
         }
     }
 
@@ -98,15 +94,16 @@ public class Statistic extends Activity implements View.OnClickListener {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Log.v(Consts.TAG, "Statistic(Activity)#onSaveInstanceState()");
+        mStatisticView.logPlayersOnCourt();
         // NOT called if the activity is closed by the user pressing the Back button or programmatically by calling finish().
         // called when the activity completes its active lifecycle, before it is killed
-        //outState.putLongArray(PersistenceKeys.PLAYERS_ON_BENCH, mPlayersOnBench);
-        outState.putLongArray(PersistenceKeys.PLAYERS_ON_COURT, mPlayersOnCourt);
+        //outState.putLongArray(PersistenceKeys.PLAYERS_ON_COURT, mPlayersOnCourt);
     }
 
     @Override
     protected void onPause() {
         Log.v(Consts.TAG, "Statistic(Activity)#onPause()");
+        mStatisticView.logPlayersOnCourt();
         super.onPause();
         mDbHelper.close();
     }
@@ -117,6 +114,7 @@ public class Statistic extends Activity implements View.OnClickListener {
         super.onStop();
         // you should not use onPause() to store user changes (such as personal information entered into a form) to permanent storage
         Log.v(Consts.TAG, "Statistic(Activity)#onStop()");
+        mStatisticView.logPlayersOnCourt();
         // TODO: Persist data to DB
     }
 
@@ -148,13 +146,14 @@ public class Statistic extends Activity implements View.OnClickListener {
      */
     public void substitutePlayers(View view) {
         //mDlg = new SubstitutePlayerDialog(this, R.style.CustomDialog, mPlayers, mPlayersOnCourt);
-        mDlg = new SubstitutePlayerDialog(this, mPlayers, mPlayersOnCourt);
+        mDlg = new SubstitutePlayerDialog(this, mPlayers);
         mDlg.show();
         Log.v(Consts.TAG, "SubstituteDialog dismissed by " + (mSubstDialogDismissedByOk ? "OK" : "Cancel"));
         if(mSubstDialogDismissedByOk) {
             // Update statistic grid view with players on court
-            Log.v(Consts.TAG, "substitutePlayers - forcing mStatisticView.invalidate()");
-            mStatisticView.invalidate();
+            mStatisticView.redraw();
+            //Log.v(Consts.TAG, "substitutePlayers - forcing mStatisticView.invalidate()");
+            //mStatisticView.invalidate();
         }
     }
 
@@ -172,4 +171,5 @@ public class Statistic extends Activity implements View.OnClickListener {
                 break;
         }
     }
+
 }

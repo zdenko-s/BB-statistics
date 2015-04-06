@@ -14,5 +14,6 @@
     <string name="title_player_detail">Player Detail</string>
     <string name="title_activity_new_game">NewGame</string>
     <string name="basketball_statistic">Basketball statistics</string>
-    <string name="substitute">Subst</string>
+    <string name="substitute">Substitute</string>
+    <string name="opponent">Opponent</string>
 </resources>
