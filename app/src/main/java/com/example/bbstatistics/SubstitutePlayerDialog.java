@@ -82,14 +82,14 @@ public class SubstitutePlayerDialog extends Dialog {
                 // Is player _id present in mPlayersOnCourt vector?
                 if(p.isOnCourt()) {
                     cursor.newRow().add(p.getPlayerId()).add(p.getPlayerNumber()).add(p.getPlayerName());
-                    Log.v(Consts.TAG, logLine + " onCourt");
+                    //Log.v(Consts.TAG, logLine + " onCourt");
                 }
             }
             else {
                 // Is player _id is not present in mPlayersOnCourt vector?
                 if(!p.isOnCourt()) {
                     cursor.newRow().add(p.getPlayerId()).add(p.getPlayerNumber()).add(p.getPlayerName());
-                    Log.v(Consts.TAG, logLine + " onBench");
+                    //Log.v(Consts.TAG, logLine + " onBench");
                 }
             }
         }

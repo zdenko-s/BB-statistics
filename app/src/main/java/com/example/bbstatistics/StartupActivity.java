@@ -46,7 +46,7 @@ public class StartupActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.v(Consts.TAG, "StartupActivity.onCreate()");
+//        Log.v(Consts.TAG, "StartupActivity.onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_startup);
         // Init singleton
@@ -115,7 +115,7 @@ public class StartupActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        Log.v(Consts.TAG, "StartupActivity.onStart()");
+//        Log.v(Consts.TAG, "StartupActivity.onStart()");
     }
 
     @Override
@@ -126,7 +126,7 @@ public class StartupActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.v(Consts.TAG, "S-StartupActivity.onResume()");
+//        Log.v(Consts.TAG, "S-StartupActivity.onResume()");
         //*
         mDbHelper.open();
         // Display list of games in list
@@ -134,12 +134,12 @@ public class StartupActivity extends Activity {
         Cursor oldCursor = mDataAdapter.swapCursor(gamesCursor);
         if(oldCursor != null && !oldCursor.isClosed())
             oldCursor.close();
-        Log.v(Consts.TAG, "E-StartupActivity.onResume()");
+//        Log.v(Consts.TAG, "E-StartupActivity.onResume()");
     }
 
     @Override
     protected void onPause() {
-        Log.v(Consts.TAG, "StartupActivity.onPause()");
+//        Log.v(Consts.TAG, "StartupActivity.onPause()");
         //TODO: Commit changes to DB
         mDbHelper.close();
         super.onPause();
@@ -148,7 +148,7 @@ public class StartupActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-        Log.v(Consts.TAG, "StartupActivity.onStop()");
+//        Log.v(Consts.TAG, "StartupActivity.onStop()");
     }
 
     @Override
@@ -175,7 +175,7 @@ public class StartupActivity extends Activity {
 
     public void addTeam(View view) {
         // Show dialog to add team
-        Log.d(Consts.TAG, "addTeam clicked");
+//        Log.d(Consts.TAG, "addTeam clicked");
         /*
         final Dialog addTeamDlg = new Dialog(this);
         addTeamDlg.setContentView(R.layout.add_team_dialog);

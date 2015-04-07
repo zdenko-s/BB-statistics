@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 
 public class Statistic extends Activity implements View.OnClickListener {
+    static final String TAG = "Statistic";
     // In memory cache of player data. Sorted by dress number. First row may contain opponent team data.
     // (Depending on user preferences)
     private PlayerGamePojo[] mPlayers;
@@ -66,17 +67,22 @@ public class Statistic extends Activity implements View.OnClickListener {
         mStatisticView.logPlayersOnCourt();
     }
 
+    // Called when energy saving turns off display. State is preserved and no need to reload data.
     @Override
     protected void onResume() {
         super.onResume();
-        Log.v(Consts.TAG, "Statistic(Activity)#onResume()");
+        Log.v(TAG, "onResume()");
         mDbHelper.open();
-        // Load players of the game from db
-        mPlayers = mDbHelper.loadPlayersOfGame(mGameId);
-        if(mPlayers != null) {
-            // TODO: If Content of mPlayersOnCourt is not empty, restore "on court state"
-            // Pass Players of game to StatisticView (child view)
-            mStatisticView.setSharedPlayersData(mPlayers);
+        if(mPlayers == null || mPlayers.length == 0) {
+            // Load players of the game from db
+            mPlayers = mDbHelper.loadPlayersOfGame(mGameId);
+            if (mPlayers != null) {
+                // Pass Players of game to StatisticView (child view)
+                mStatisticView.setSharedPlayersData(mPlayers);
+            }
+        }
+        else {
+            Log.v(TAG, "onResume() not reloading data.");
         }
     }
 
@@ -145,15 +151,14 @@ public class Statistic extends Activity implements View.OnClickListener {
      * @param view
      */
     public void substitutePlayers(View view) {
-        //mDlg = new SubstitutePlayerDialog(this, R.style.CustomDialog, mPlayers, mPlayersOnCourt);
+        // If number of players marked as "on court" changes, recalculate height of row
+        //int playersMarkedOnCourt =
         mDlg = new SubstitutePlayerDialog(this, mPlayers);
         mDlg.show();
         Log.v(Consts.TAG, "SubstituteDialog dismissed by " + (mSubstDialogDismissedByOk ? "OK" : "Cancel"));
         if(mSubstDialogDismissedByOk) {
             // Update statistic grid view with players on court
             mStatisticView.redraw();
-            //Log.v(Consts.TAG, "substitutePlayers - forcing mStatisticView.invalidate()");
-            //mStatisticView.invalidate();
         }
     }
 

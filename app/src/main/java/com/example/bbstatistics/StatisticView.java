@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.os.Parcelable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -20,7 +19,7 @@ import java.util.ArrayList;
 
 public class StatisticView extends View implements View.OnClickListener {
     private static final String TAG = "StatisticView";
-    private static final int DATA_ROWS = 6;// Assumed value to calculate size of font to display in grid
+    private static final int MIN_DATA_ROWS = 5;// Assumed value to calculate size of font to display in grid
     private static final int NAME_COL_WIDTH_MULTIPLIER = 3;//, COLS = 10;
     private int mIncrement = 1; // When user touches display, value in cell is incremented by this (either +1 or -1)
     private float mTextSize = 10, mVerticalPadding = 0;
@@ -57,9 +56,11 @@ public class StatisticView extends View implements View.OnClickListener {
         mLinePaint.setStyle(Paint.Style.STROKE);
         mLinePaint.setStrokeJoin(Paint.Join.ROUND);
         mLinePaint.setStrokeWidth(5f);
-        // Get Model from Activity
-        //Statistic stat = (Statistic) getContext();
-        //data = new int[DATA_ROWS_][BBPlayer.getColumnCount()];
+        // Set Paint properties
+        mHeaderTextPaint.setColor(Color.BLUE);
+        mTextPaint.setColor(Color.BLACK);
+        mTextPaint.setTextSize(100);
+        mTextPaint.setTextScaleX(1.0f);
     }
 
     @Override
@@ -69,34 +70,43 @@ public class StatisticView extends View implements View.OnClickListener {
         //int mHeight = h;
         //Bitmap canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         //Canvas drawCanvas = new Canvas(canvasBitmap);
-        adjustTextSize();
+
+        // Name column is header column
+        mNameColWidth = getWidth() / (BBPlayer.getColumnCount() + NAME_COL_WIDTH_MULTIPLIER) * NAME_COL_WIDTH_MULTIPLIER;
+        // Column width does not changes
+        mColWidth = (getWidth() - mNameColWidth) / BBPlayer.getColumnCount();
+        adjustRowHeightAndTextSize();
     }
 
     /**
+     * More players can be displayed in grid than actually on court
      * Adjust text size to fit into cell
      */
-    private void adjustTextSize() {
-        // Calculate size of text based on 6+1 lines in grid
+    private void adjustRowHeightAndTextSize() {
+        // Calculate size of text based on 5+1 lines in grid (+1 header row)
+        // mPlayersOnCourtIdx contains 'OpponentRowNum' numbers at beginning of ArrayList
+        int rowCount = Math.max( MIN_DATA_ROWS + Settings.OpponentRowNum, mPlayersOnCourtIdx.size() );
+        // Add header row
+        rowCount++;
         // One more row needed for header row
-        mRowHeight = getHeight() / Math.max( (DATA_ROWS + 1), mPlayersOnCourtIdx.size() );
-        // Name column is header column
-        mNameColWidth = getWidth() / (BBPlayer.getColumnCount() + NAME_COL_WIDTH_MULTIPLIER) * NAME_COL_WIDTH_MULTIPLIER;
-        mColWidth = (getWidth() - mNameColWidth) / BBPlayer.getColumnCount();
-        // Set Paint properties
-        mHeaderTextPaint.setColor(Color.BLUE);
-        mTextPaint.setColor(Color.BLACK);
-        mTextPaint.setTextSize(100);
-        mTextPaint.setTextScaleX(1.0f);
-        Rect bounds = new Rect();
-        // ask the paint for the bounding rect if it were to draw this text
-        mTextPaint.getTextBounds("00", 0, 2, bounds);
-        // get the height that would have been produced
-        int h = bounds.bottom - bounds.top;
-        Log.d(Consts.TAG, "Bounds height:" + h);
-        // make the text text up 70% of the row height
-        float target = (float) mRowHeight * .7f;
-        // figure out what textSize setting would create that height of text
-        mTextSize = ((target / h) * 100f) * .7f;
+        mRowHeight = getHeight() / rowCount;
+//        Rect bounds = new Rect();
+//        // ask the paint for the bounding rect if it were to draw this text
+//        mTextPaint.getTextBounds("00", 0, 2, bounds);
+//        // get the height that would have been produced
+//        int h = bounds.bottom - bounds.top;
+//        // Height of text is not proportional to row height. Try some adjustment ratio
+//        float ratio = 9 - rowCount;
+//        ratio = ratio > 0 ? ratio : 0;
+//        ratio /= 20;
+//        ratio = 1f - ratio;
+//        // make the text text up 70% of the row height
+//        float target = (float) mRowHeight * .7f;
+//        // figure out what textSize setting would create that height of text
+//        mTextSize = ((target / h) * 100f) * .6f * ratio;
+//        Log.v(TAG, "adjHeight() rc:" + rowCount + ", pCnt:" + mPlayersOnCourtIdx.size() + ", rowH:" + mRowHeight
+//                + ", Rat:" + ratio + ", txtH:" + mTextSize +", H:" + getHeight());
+        mTextSize = mRowHeight * .7f;
         mVerticalPadding = (mRowHeight - mTextSize) / 2;
         //Log.d(Consts.TAG, "Target:" + target + ", RowHeight:" + mRowHeight + ", ColWidth=" + mColWidth + ", TextSize:" + mTextSize);
         // and set it into the paint
@@ -147,15 +157,19 @@ public class StatisticView extends View implements View.OnClickListener {
             canvas.drawLine(mNameColWidth + col * mColWidth, 0, mNameColWidth + col * mColWidth, h, mLinePaint);
         }
         String[] colHeaders = BBPlayer.getColumnNames();
+        // Draw column by column
         for (int col = 0; col < BBPlayer.getColumnCount(); col++) {
-            int dx = mNameColWidth + col * mColWidth;
+            int dx = mNameColWidth + col * mColWidth + 5;
             // Display column headers
             canvas.drawText(colHeaders[col], dx, mRowHeight - mVerticalPadding, mHeaderTextPaint);
-//            for (int row = 0; row < mDataRows; row++) {
-//                int dy = (int) (row * mRowHeight + 2 * mRowHeight - mVerticalPadding);
-//                // Display values in cells
-//                canvas.drawText("" + data[row][col], dx, dy, mTextPaint);
-//            }
+            // Draw cell from up to down (row by row)
+            for (int row = 0; row < dataRowsCount; row++) {
+                int dy = (int) (row * mRowHeight + 2 * mRowHeight - mVerticalPadding);
+                // Display values in cells
+                int playerIdx = mPlayersOnCourtIdx.get(row);
+                PlayerGamePojo p = mPlayersPojoCache[playerIdx];
+                canvas.drawText("" + p.getFieldValue(col), dx, dy, mTextPaint);
+            }
         }
     }
 
@@ -174,7 +188,7 @@ public class StatisticView extends View implements View.OnClickListener {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.d(Consts.TAG, "Touched at x:" + x + ", y:" + y);
+                //Log.d(Consts.TAG, "Touched at x:" + x + ", y:" + y);
                 if (x > mNameColWidth && y > mRowHeight) {
                     // Calculate row, col what was touched
                     col = (int) ((x - mNameColWidth) / mColWidth);
@@ -182,12 +196,14 @@ public class StatisticView extends View implements View.OnClickListener {
                     Log.d(Consts.TAG, "Touched at col:" + col + ", row:" + row);
                     if (row >= 0 && col >= 0) {
                         if (row < dataRowsCount && col < BBPlayer.getColumnCount()) {
+                            // Indirect access to mPlayersPojoCache through index stored in ArrayList
+                            PlayerGamePojo p = mPlayersPojoCache[mPlayersOnCourtIdx.get(row)];
                             // Is cell data 0? It can't be decremented
-//                            if (mIncrement < 0 && data[row][col] == 0)
-//                                break;
-//                            //Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col] + ". Inc:" + mIncrement);
-//                            data[row][col] += mIncrement;
-//                            Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col]);
+                            if (mIncrement < 0 && p.getFieldValue(col) == 0)
+                                break;
+                            Log.d(Consts.TAG, "P " + p.getPlayerNumber() + "[" + col + "]=" + p.getFieldValue(col) + ". Inc:" + mIncrement);
+                            p.addToField(col, mIncrement);
+                            //Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col]);
                             // Calculate size of rectangle to invalidate
                             //int t = (row + 1) * mRowHeight;
                             //int l = mNameColWidth + col * mColWidth;
@@ -207,6 +223,7 @@ public class StatisticView extends View implements View.OnClickListener {
                 break;
         }
         invalidate();
+//        logPlayersOnCourt();
         return true;
     }
 
@@ -244,32 +261,28 @@ public class StatisticView extends View implements View.OnClickListener {
         }
     }
 
-    /**
-     * mGridData array contains indices of data in PlayerGamePojo array. PlayerGamePojo holds data for every player
-     * mGridData contains indices of players on court. Data of those players is displayed in grid.
-     * mGridData is updated with every substitution. Data on screen will be displayed in order as in mGriData.
-     * mGridData
-     */
-    private void setGridDataIndices() {
-
-    }
-
     public void logPlayersOnCourt() {
         StringBuffer sb = new StringBuffer("Content of mPlayersOnCourt:");
         for (Integer l : mPlayersOnCourtIdx) {
             sb.append(l).append(",");
         }
-        Log.v(Consts.TAG, sb.toString());
+        Log.v(TAG, sb.toString());
     }
 
     /**
      * Refill list of players on court and redraw grid
      */
     public void redraw() {
+        // Compare number of players marked on court before and after substitution
+        int countOfPlayersOnCourt = mPlayersOnCourtIdx.size();
         mPlayersOnCourtIdx.clear();
         for (int i = 0; i < mPlayersPojoCache.length; i++) {
             if (mPlayersPojoCache[i].isOnCourt())
                 mPlayersOnCourtIdx.add(i);  // Index is added for direct array access
+        }
+        if(mPlayersOnCourtIdx.size() != countOfPlayersOnCourt) {
+            // There may be more/less players marked as 'on court'. Recalculate row height.
+            adjustRowHeightAndTextSize();
         }
         logPlayersOnCourt();
         invalidate();
