@@ -145,6 +145,7 @@ public class DbHelper extends SQLiteOpenHelper {
         Log.d(Consts.TAG, Game.SQL_CREATE_VIEW_GAMES);
         Log.d(Consts.TAG, PlayerGame.SQL_CREATE_TABLE);
         Log.d(Consts.TAG, PlayerGame.SQL_CREATE_VIEW_PG);
+        Log.d(Consts.TAG, GameStatistic.SQL_CREATE_TABLE);
 
         db.execSQL(Team.SQL_CREATE_TABLE);
         db.execSQL(Player.SQL_CREATE_TABLE);
@@ -152,11 +153,15 @@ public class DbHelper extends SQLiteOpenHelper {
         db.execSQL(Game.SQL_CREATE_VIEW_GAMES);
         db.execSQL(PlayerGame.SQL_CREATE_TABLE);
         db.execSQL(PlayerGame.SQL_CREATE_VIEW_PG);
+        db.execSQL(GameStatistic.SQL_CREATE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        if(newVersion == 2 && oldVersion == 1) {
+            Log.d(Consts.TAG, GameStatistic.SQL_CREATE_TABLE);
+            db.execSQL(GameStatistic.SQL_CREATE_TABLE);
+        }
     }
 
     // Add players of game to linking table Player -> Player_Game <- Game
@@ -187,8 +192,8 @@ public class DbHelper extends SQLiteOpenHelper {
             // Size of array is equal to size of cursor
             PlayerGamePojo[] ret = new PlayerGamePojo[cursor.getCount() + Settings.OpponentRowNum];
             int idx = 0;
-            if(Settings.OpponentRowNum == 1) {
-                PlayerGamePojo pojo = new PlayerGamePojo(0, 99, "Opp");
+            if (Settings.OpponentRowNum == 1) {
+                PlayerGamePojo pojo = new PlayerGamePojo(0, 99, "Opponentaaaaaaaa");
                 pojo.setOnCourt(true);
                 ret[idx++] = pojo;
             }
@@ -306,5 +311,39 @@ public class DbHelper extends SQLiteOpenHelper {
                 + " = t." + Team.COL_ID + " \n INNER JOIN " + Game.TABLE_NAME + " AS g ON pg." + PlayerGame.COL_GAME_ID
                 + " = g." + Game.COL_ID + " \n ORDER BY g." + Game.COL_DATE_TIME + " DESC, p." + Player.COL_NUMBER + " ASC;";
         public static final String[] V_COLUMNS = {COL_ID, COL_GAME_ID, COL_PLAYER_ID, Player.COL_NUMBER, Player.COL_NAME};
+
     }
+
+    public final static class GameStatistic {
+        public static final String TABLE_NAME = "game_statistc";
+        public static final String COL_ID = "_id";
+        public static final String COL_GAME_ID = "game_id";
+        public static final String COL_PLAYER_ID = "player_id";
+        public static final String COL_PERIOD = "period";
+        // CREATE TABLE stat_data ( _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+        // , game_id INTEGER NOT NULL REFERENCES game (_id)
+        // ,player_id INTEGER NOT NULL REFERENCES player (_id)
+        // ,period    INTEGER NOT NULL
+        // ,colx INTEGER DEFAULT (0) NOT NULL
+        public static final String SQL_CREATE_TABLE;
+
+        static {
+            StringBuffer sb = new StringBuffer(
+                    "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (\n" + COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL\n"
+                            + ", " + COL_GAME_ID + " INTEGER NOT NULL REFERENCES " + Game.TABLE_NAME + " (" + Game.COL_ID + ")\n"
+                            + ", " + COL_PLAYER_ID + " INTEGER NOT NULL REFERENCES " + Player.TABLE_NAME + " (" + Player.COL_ID + ")\n"
+                            + ", " + COL_PERIOD + " INTEGER NOT NULL\n"
+            );
+            // add one by one SQL column definition (DDL)
+            // ,colx INTEGER DEFAULT (0) NOT NULL
+            for (PlayerGamePojo.DbColumnName dbColName : PlayerGamePojo.DbColumnName.values()) {
+                sb.append(",").append(dbColName.name()).append(" INTEGER DEFAULT (0) NOT NULL \n");
+            }
+            sb.append(");");
+
+            SQL_CREATE_TABLE = sb.toString();
+        }
+
+    }
+
 }

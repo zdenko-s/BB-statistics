@@ -97,19 +97,7 @@ public class StartupActivity extends Activity {
         */
         //
         mDbHelper = new DbHelper(this);
-        //mDbHelper.open();
-        // Test adapter
-        /*
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_list_item_activated_2,
-                mDbHelper.getListOfTeams(),
-                DbHelper.Team.COLUMNS,
-                new int[]{android.R.id.text1, android.R.id.text2}, 0);
-
-        ListView listView = (ListView) findViewById(R.id.listViewTeamsTest);
-        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        listView.setAdapter(adapter);
-        //*/
+        Log.v(Consts.TAG, DbHelper.GameStatistic.SQL_CREATE_TABLE);
     }
 
     @Override

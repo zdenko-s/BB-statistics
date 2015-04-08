@@ -22,7 +22,7 @@ public class StatisticView extends View implements View.OnClickListener {
     private static final int MIN_DATA_ROWS = 5;// Assumed value to calculate size of font to display in grid
     private static final int NAME_COL_WIDTH_MULTIPLIER = 3;//, COLS = 10;
     private int mIncrement = 1; // When user touches display, value in cell is incremented by this (either +1 or -1)
-    private float mTextSize = 10, mVerticalPadding = 0;
+    private float mVerticalPadding;
     private int mRowHeight, mColWidth;
     private int mNameColWidth;
     private Paint mLinePaint;
@@ -30,6 +30,7 @@ public class StatisticView extends View implements View.OnClickListener {
     // In memory cached data of players
     private PlayerGamePojo[] mPlayersPojoCache; // Every player at game
     private ArrayList<Integer> mPlayersOnCourtIdx = new ArrayList<>(); // Indices of players on court.
+    private int mHeaderTextSize;
 
     public StatisticView(Context context) {
         super(context);
@@ -49,6 +50,9 @@ public class StatisticView extends View implements View.OnClickListener {
         init();
     }
 
+    /**
+     * Initialize drawing objects
+     */
     private void init() {
         mLinePaint = new Paint();
         mLinePaint.setAntiAlias(true);
@@ -67,8 +71,6 @@ public class StatisticView extends View implements View.OnClickListener {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        //int mWidth = w;
-        //int mHeight = h;
         //Bitmap canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         //Canvas drawCanvas = new Canvas(canvasBitmap);
 
@@ -107,13 +109,14 @@ public class StatisticView extends View implements View.OnClickListener {
 //        mTextSize = ((target / h) * 100f) * .6f * ratio;
 //        Log.v(TAG, "adjHeight() rc:" + rowCount + ", pCnt:" + mPlayersOnCourtIdx.size() + ", rowH:" + mRowHeight
 //                + ", Rat:" + ratio + ", txtH:" + mTextSize +", H:" + getHeight());
-        mTextSize = mRowHeight * .7f;
-        mVerticalPadding = (mRowHeight - mTextSize) / 2;
+        float textSize = mRowHeight * .7f;
+        mVerticalPadding = (mRowHeight - textSize) / 2;
         //Log.d(Consts.TAG, "Target:" + target + ", RowHeight:" + mRowHeight + ", ColWidth=" + mColWidth + ", TextSize:" + mTextSize);
         // and set it into the paint
-        mTextPaint.setTextSize(mTextSize);
-        mPlayerNamePaint.setTextSize(mTextSize * 0.5f);
-        mHeaderTextPaint.setTextSize(mTextSize * 0.6f);
+        mTextPaint.setTextSize(textSize);
+        mPlayerNamePaint.setTextSize(textSize * 0.5f);
+        mHeaderTextSize = Math.round(textSize * 0.6f);
+        mHeaderTextPaint.setTextSize(mHeaderTextSize);
     }
 
     // override onDraw
@@ -121,12 +124,6 @@ public class StatisticView extends View implements View.OnClickListener {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //Log.v(Consts.TAG, "StatisticView#onDraw(Canvas canvas)");
-
-        //canvas.drawBitmap(canvasBitmap, 0, 0, mLinePaint);
-//        Rect rect = new Rect();
-//        canvas.getClipBounds(rect);
-//        Log.d(Consts.TAG, "StatisticView#onDraw clip bounds:" + rect.toShortString());
-//        Log.d(Consts.TAG, "StatisticView#onDraw players count:" + rect.toShortString());
         canvas.drawRect(0, 0, getWidth(), getHeight(), mLinePaint);
         drawGrid(canvas);
     }
@@ -141,17 +138,23 @@ public class StatisticView extends View implements View.OnClickListener {
         int dataRowsCount = mPlayersOnCourtIdx.size();
         int w = getWidth();
         int h = getHeight();
-        //float rowHeight = getHeight() / DATA_ROWS;
-        //float colWidth = (getWidth() - NAME_COL_WIDTH) / COLS;
         // Display horizontal lines
         for (int i = 0; i < dataRowsCount; i++) {
             canvas.drawLine(0, (i + 1) * mRowHeight, w, (i + 1) * mRowHeight, mLinePaint);
-            // Display player names
+            // Display player numbers followed by name
             int playerIdx = mPlayersOnCourtIdx.get(i);
             if (playerIdx <= mPlayersPojoCache.length) {
                 PlayerGamePojo p = mPlayersPojoCache[playerIdx];
-                String str = p.getPlayerNumber() + ":" + p.getPlayerName();
-                canvas.drawText(str, 0, (i + 2) * mRowHeight - 10, mPlayerNamePaint);
+                String str = String.format("%2d", p.getPlayerNumber());
+                canvas.drawText(str, 0, (i + 2) * mRowHeight - mVerticalPadding, mHeaderTextPaint);
+                // Display beginning of name with smaller font
+                // X coordinate is same as row height. Player number is displayed in square.
+                // Length in pixels could be calculated, but this estimate is faster to do.
+                str = String.format("%.7s", p.getPlayerName());
+                canvas.drawText(str, mHeaderTextSize, (i + 2) * mRowHeight - mVerticalPadding, mPlayerNamePaint);
+            }
+            else {
+                Log.e(TAG, "Player on court index " + playerIdx + " out of range.");
             }
         }
         // Display vertical lines
@@ -164,7 +167,7 @@ public class StatisticView extends View implements View.OnClickListener {
             int dx = mNameColWidth + col * mColWidth + 5;
             // Display column headers
             canvas.drawText(colHeaders[col], dx, mRowHeight - mVerticalPadding, mHeaderTextPaint);
-            // Draw cell from up to down (row by row)
+            // Draw cells from up to down (row by row)
             for (int row = 0; row < dataRowsCount; row++) {
                 int dy = (int) (row * mRowHeight + 2 * mRowHeight - mVerticalPadding);
                 // Display values in cells
@@ -287,6 +290,7 @@ public class StatisticView extends View implements View.OnClickListener {
             adjustRowHeightAndTextSize();
         }
         logPlayersOnCourt();
-        invalidate();
+        forceLayout();
+        //invalidate();
     }
 }
