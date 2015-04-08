@@ -26,7 +26,7 @@ public class StatisticView extends View implements View.OnClickListener {
     private int mRowHeight, mColWidth;
     private int mNameColWidth;
     private Paint mLinePaint;
-    private TextPaint mTextPaint = new TextPaint(), mHeaderTextPaint = new TextPaint();
+    private TextPaint mTextPaint = new TextPaint(), mHeaderTextPaint = new TextPaint(), mPlayerNamePaint = new TextPaint();
     // In memory cached data of players
     private PlayerGamePojo[] mPlayersPojoCache; // Every player at game
     private ArrayList<Integer> mPlayersOnCourtIdx = new ArrayList<>(); // Indices of players on court.
@@ -58,6 +58,7 @@ public class StatisticView extends View implements View.OnClickListener {
         mLinePaint.setStrokeWidth(5f);
         // Set Paint properties
         mHeaderTextPaint.setColor(Color.BLUE);
+        mPlayerNamePaint.setColor(Color.GREEN);
         mTextPaint.setColor(Color.BLACK);
         mTextPaint.setTextSize(100);
         mTextPaint.setTextScaleX(1.0f);
@@ -111,6 +112,7 @@ public class StatisticView extends View implements View.OnClickListener {
         //Log.d(Consts.TAG, "Target:" + target + ", RowHeight:" + mRowHeight + ", ColWidth=" + mColWidth + ", TextSize:" + mTextSize);
         // and set it into the paint
         mTextPaint.setTextSize(mTextSize);
+        mPlayerNamePaint.setTextSize(mTextSize * 0.5f);
         mHeaderTextPaint.setTextSize(mTextSize * 0.6f);
     }
 
@@ -149,7 +151,7 @@ public class StatisticView extends View implements View.OnClickListener {
             if (playerIdx <= mPlayersPojoCache.length) {
                 PlayerGamePojo p = mPlayersPojoCache[playerIdx];
                 String str = p.getPlayerNumber() + ":" + p.getPlayerName();
-                canvas.drawText(str, 0, (i + 2) * mRowHeight - 10, mHeaderTextPaint);
+                canvas.drawText(str, 0, (i + 2) * mRowHeight - 10, mPlayerNamePaint);
             }
         }
         // Display vertical lines
