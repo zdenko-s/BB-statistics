@@ -149,7 +149,6 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
         }
         Log.d(Consts.TAG, "Date/time in DB format:" + dateTimeString);
         // Get teamID from selection
-        //final int selectedTeamListPos = mlvTeams.getSelectedItemPosition();
         final int checkedItemPos = mlvTeams.getCheckedItemPosition();
         if (checkedItemPos == AdapterView.INVALID_POSITION) {
             Toast.makeText(this, "Team not selected", Toast.LENGTH_SHORT).show();
