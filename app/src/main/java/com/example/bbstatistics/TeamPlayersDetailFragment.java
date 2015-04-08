@@ -16,7 +16,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
+import com.example.bbstatistics.model.DbHelper;
 
 /**
  * A fragment representing a single Team detail screen.

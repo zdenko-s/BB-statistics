@@ -10,10 +10,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
-import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
+import com.example.bbstatistics.model.DbHelper;
 import com.example.bbstatistics.pojo.PlayerGamePojo;
-
-import java.util.ArrayList;
 
 /**
  * Created by Zdenko on 2015-04-05.

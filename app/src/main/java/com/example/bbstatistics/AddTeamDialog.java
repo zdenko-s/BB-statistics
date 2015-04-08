@@ -11,7 +11,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
+import com.example.bbstatistics.model.DbHelper;
 
 public class AddTeamDialog extends Dialog {
     final private DbHelper mDbHelper;

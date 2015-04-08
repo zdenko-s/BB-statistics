@@ -21,7 +21,7 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
+import com.example.bbstatistics.model.DbHelper;
 
 import java.text.DateFormat;
 import java.text.ParseException;

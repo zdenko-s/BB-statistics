@@ -1,6 +1,6 @@
 package com.example.bbstatistics.pojo;
 
-import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
+import com.example.bbstatistics.model.DbHelper;
 
 /**
  * Created by zdenko on 2015-04-05.

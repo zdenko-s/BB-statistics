@@ -10,10 +10,8 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 
-import com.example.bbstatistics.com.example.bbstatistics.model.DbHelper;
+import com.example.bbstatistics.model.DbHelper;
 import com.example.bbstatistics.pojo.PlayerGamePojo;
-
-import java.util.ArrayList;
 
 
 public class Statistic extends Activity implements View.OnClickListener {
