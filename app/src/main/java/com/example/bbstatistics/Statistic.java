@@ -2,15 +2,19 @@ package com.example.bbstatistics;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.content.ClipboardManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.bbstatistics.model.DbHelper;
 import com.example.bbstatistics.pojo.PlayerGamePojo;
@@ -92,9 +96,15 @@ public class Statistic extends Activity implements View.OnClickListener {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.save_changes_title))
                 .setMessage(getString(R.string.save_changes_question))
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface arg0, int arg1) {
                         Statistic.super.onBackPressed();
+                    }
+                })
+                .setNeutralButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        return;
                     }
                 })
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -146,7 +156,7 @@ public class Statistic extends Activity implements View.OnClickListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_statistic, menu);
+        getMenuInflater().inflate(R.menu.menu_statistic, menu);
         return true;
     }
 
@@ -158,8 +168,20 @@ public class Statistic extends Activity implements View.OnClickListener {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case R.id.action_statistic_settings:
+                Toast.makeText(this, "TODO: Settings", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.action_statistic_copy:
+                // Gets a handle to the clipboard service.
+                ClipboardManager clipboard = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+                // Creates a new text clip to put on the clipboard
+                // TODO: Copy statistic data as XML to clipboard
+                ClipData clip = ClipData.newPlainText("simple text","Hello, World!");
+                // Set the clipboard's primary clip.
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(this, "Copied to clipboard!", Toast.LENGTH_SHORT).show();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

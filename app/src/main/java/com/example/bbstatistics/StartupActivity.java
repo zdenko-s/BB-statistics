@@ -154,6 +154,7 @@ public class StartupActivity extends Activity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Toast.makeText(this, "TODO: Global Settings", Toast.LENGTH_SHORT).show();
             return true;
         }
 
