@@ -3,7 +3,7 @@ package com.example.bbstatistics.pojo;
 import com.example.bbstatistics.model.DbHelper;
 
 /**
- * Created by zdenko on 2015-04-05.
+ * Created by Zdenko on 2015-04-05.
  */
 public class PlayerGamePojo {
     public enum DbColumnName {
