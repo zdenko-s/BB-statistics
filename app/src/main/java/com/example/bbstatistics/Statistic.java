@@ -1,6 +1,8 @@
 package com.example.bbstatistics;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,7 +26,9 @@ public class Statistic extends Activity implements View.OnClickListener {
         static final String PLAYERS_ON_COURT = "court";
         static final String PLAYERS_ON_BENCH = "bench";
     }
+
     private long mGameId;
+    private int mPeriod = 1;
     private DbHelper mDbHelper;
     private StatisticView mStatisticView;
     private SubstitutePlayerDialog mDlg;
@@ -47,9 +51,6 @@ public class Statistic extends Activity implements View.OnClickListener {
         Intent intent = getIntent();
         // Show game statistic
         mGameId = intent.getLongExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, DbHelper.INVALID_ID);
-        if(mGameId == DbHelper.INVALID_ID) {
-            return;
-        }
     }
 
     private void addListeners() {
@@ -71,24 +72,44 @@ public class Statistic extends Activity implements View.OnClickListener {
         super.onResume();
         Log.v(TAG, "onResume()");
         mDbHelper.open();
-        if(mPlayers == null || mPlayers.length == 0) {
+        if (mPlayers == null || mPlayers.length == 0) {
             // Load players of the game from db
             mPlayers = mDbHelper.loadPlayersOfGame(mGameId);
             if (mPlayers != null) {
                 // Pass Players of game to StatisticView (child view)
                 mStatisticView.setSharedPlayersData(mPlayers);
             }
-        }
-        else {
+        } else {
             Log.v(TAG, "onResume() not reloading data.");
         }
+    }
+
+    /**
+     * WHen back button pressed, prompt user to save data
+     */
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.save_changes_title))
+                .setMessage(getString(R.string.save_changes_question))
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        Statistic.super.onBackPressed();
+                    }
+                })
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        if (save())
+                            Statistic.super.onBackPressed();
+                    }
+                }).create().show();
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         Log.v(Consts.TAG, "Statistic(Activity)#onRestoreInstanceState()");
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             Log.v(Consts.TAG, "Statistic(Activity)#onRestoreInstanceState(): saved state present");
             //mPlayersOnCourt = savedInstanceState.getLongArray(PersistenceKeys.PLAYERS_ON_COURT);
         }
@@ -146,6 +167,7 @@ public class Statistic extends Activity implements View.OnClickListener {
 
     /**
      * Show dialog where used can choose players to substitute
+     *
      * @param view
      */
     public void substitutePlayers(View view) {
@@ -154,7 +176,7 @@ public class Statistic extends Activity implements View.OnClickListener {
         mDlg = new SubstitutePlayerDialog(this, mPlayers);
         mDlg.show();
         Log.v(Consts.TAG, "SubstituteDialog dismissed by " + (mSubstDialogDismissedByOk ? "OK" : "Cancel"));
-        if(mSubstDialogDismissedByOk) {
+        if (mSubstDialogDismissedByOk) {
             // Update statistic grid view with players on court
             mStatisticView.redraw();
         }
@@ -175,4 +197,13 @@ public class Statistic extends Activity implements View.OnClickListener {
         }
     }
 
+    /**
+     * Save PlayerGamePojo to db
+     *
+     * @return
+     */
+    private boolean save() {
+        mDbHelper.savePlayerStatistic(mGameId, mPeriod, mPlayers);
+        return true;
+    }
 }

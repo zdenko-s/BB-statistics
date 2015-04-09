@@ -6,6 +6,16 @@ import com.example.bbstatistics.model.DbHelper;
  * Created by zdenko on 2015-04-05.
  */
 public class PlayerGamePojo {
+    private boolean mDirty = false;
+
+    public boolean isDirty() {
+        return mDirty;
+    }
+
+    public void clearDirty() {
+        this.mDirty = false;
+    }
+
     public enum DbColumnName {
         shot1pt, attempt1pt, shot2pt, attempt2pt,shot3pt, attempt3pt, def_rebound, off_rebound
         , turn_over, steal, foul, foul_given, assist
@@ -84,6 +94,7 @@ public class PlayerGamePojo {
      * @param increment
      */
     public void addToField(int index, int increment) {
+        mDirty = true;
         rowData[index] += increment;
     }
 

@@ -11,6 +11,8 @@ import com.example.bbstatistics.Consts;
 import com.example.bbstatistics.Settings;
 import com.example.bbstatistics.pojo.PlayerGamePojo;
 
+import java.util.ArrayList;
+
 
 public class DbHelper extends SQLiteOpenHelper {
     public static final long INVALID_ID = -1;
@@ -31,6 +33,8 @@ public class DbHelper extends SQLiteOpenHelper {
     public void open() {
         Log.d(Consts.TAG, "DbHelper#open()");
         mDb = super.getWritableDatabase();
+//        Log.v(Consts.TAG, DbHelper.GameStatistic.SQL_CREATE_TABLE);
+//        mDb.execSQL(GameStatistic.SQL_CREATE_TABLE);
     }
 
     @Override
@@ -38,11 +42,6 @@ public class DbHelper extends SQLiteOpenHelper {
         Log.d(Consts.TAG, "DbHelper#close()");
         super.close();
     }
-    /*
-    public SQLiteDatabase getDb() {
-        return mDb;
-    }
-*/
 
     /**
      * Add team to DB
@@ -158,7 +157,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if(newVersion == 2 && oldVersion == 1) {
+        if (newVersion == 2 && oldVersion == 1) {
             Log.d(Consts.TAG, GameStatistic.SQL_CREATE_TABLE);
             db.execSQL(GameStatistic.SQL_CREATE_TABLE);
         }
@@ -166,7 +165,6 @@ public class DbHelper extends SQLiteOpenHelper {
 
     // Add players of game to linking table Player -> Player_Game <- Game
     public void addPlayersToGame(long gameId, Long[] playersAtGame) {
-        //TODO: Insert one by one players into DB
         // Each player is single entry in linking table
         for (int i = 0; i < playersAtGame.length; i++) {
             ContentValues values = new ContentValues();
@@ -193,7 +191,7 @@ public class DbHelper extends SQLiteOpenHelper {
             PlayerGamePojo[] ret = new PlayerGamePojo[cursor.getCount() + Settings.OpponentRowNum];
             int idx = 0;
             if (Settings.OpponentRowNum == 1) {
-                PlayerGamePojo pojo = new PlayerGamePojo(0, 99, "Opponentaaaaaaaa");
+                PlayerGamePojo pojo = new PlayerGamePojo(0, 111, "Opponentaaaaaaaa");
                 pojo.setOnCourt(true);
                 ret[idx++] = pojo;
             }
@@ -208,9 +206,81 @@ public class DbHelper extends SQLiteOpenHelper {
                 ret[idx++] = pojo;
                 cursor.moveToNext();
             }
+            // Load Games statistic
+            //TODO: Load data from GameStatistic table for last period
+            cursor = mDb.query(GameStatistic.TABLE_NAME, GameStatistic.COLUMNS
+                    , GameStatistic.COL_GAME_ID + "=? and " + GameStatistic.COL_PERIOD + "=?",
+                    new String[]{Long.toString(gameId), Integer.toString(1)}, null, null, null);
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                Long playerId = cursor.getLong(cursor.getColumnIndex(GameStatistic.COL_PLAYER_ID));
+                // Find user in array of users
+                for(PlayerGamePojo player : ret) {
+                    if(player.getPlayerId() == playerId) {
+                        for(PlayerGamePojo.DbColumnName col : PlayerGamePojo.DbColumnName.values()) {
+                            int val = cursor.getInt(cursor.getColumnIndex(col.name()));
+                            player.setFieldValue(col, (byte)val);
+                        }
+                        // Load statistic for this game
+                        break;
+                    }
+                }
+                cursor.moveToNext();
+            }
             return ret;
         } else
             return null;
+    }
+
+    /**
+     * Inserts new record in db or updates existing.
+     *
+     * @param gameId  Id of game
+     * @param period  Which period
+     * @param players Players' cached data of one game
+     */
+    public void savePlayerStatistic(long gameId, int period, PlayerGamePojo[] players) {
+        // In first stage, query how many rows already exists in db for specific gameId, period
+        Cursor c = mDb.query(GameStatistic.TABLE_NAME, new String[]{GameStatistic.COL_PLAYER_ID}
+                , GameStatistic.COL_GAME_ID + "=? and " + GameStatistic.COL_PERIOD + "=?",
+                new String[]{Long.toString(gameId), Integer.toString(period)}, null, null, null);
+        c.moveToFirst();
+        ArrayList<Long> updateUsers = new ArrayList<>();
+        while (!c.isAfterLast()) {
+            Long playerId = c.getLong(c.getColumnIndex(GameStatistic.COL_PLAYER_ID));
+            updateUsers.add(playerId);
+            c.moveToNext();
+        }
+        // Save every player's data
+        // enum of column names is not assigned to final String at compile time but gathered at runtime
+        ContentValues values = new ContentValues(GameStatistic.COLUMNS.length - 1);
+        ContentValues statisticValues = new ContentValues(PlayerGamePojo.DbColumnName.values().length);
+        for (PlayerGamePojo player : players) {
+            values.clear();
+            statisticValues.clear();
+            // First, create parameters common to INSERT and UPDATE
+            for (PlayerGamePojo.DbColumnName dbColumn : PlayerGamePojo.DbColumnName.values()) {
+                statisticValues.put(dbColumn.name(), player.getFieldValue(dbColumn));
+            }
+            if (updateUsers.contains(player.getPlayerId())) {
+                // UPDATE
+                // WHERE
+                String where = GameStatistic.COL_GAME_ID + "=? and " + GameStatistic.COL_PLAYER_ID + "=? and "
+                        + GameStatistic.COL_PERIOD + "=? ";
+                String[] whereValues = new String[]{Long.toString(gameId), Long.toString(player.getPlayerId())
+                        , Integer.toString(period)};
+                mDb.update(GameStatistic.TABLE_NAME, statisticValues, where, whereValues);
+            } else {
+                // INSERT
+                values.put(GameStatistic.COL_GAME_ID, gameId);
+                values.put(GameStatistic.COL_PLAYER_ID, player.getPlayerId());
+                values.put(GameStatistic.COL_PERIOD, period);
+                values.putAll(statisticValues);
+                mDb.insert(GameStatistic.TABLE_NAME, null, values);
+            }
+            //savePlayerStatistic(mGameId, mPeriod, player);
+        }
+
     }
 
     /**
@@ -320,6 +390,7 @@ public class DbHelper extends SQLiteOpenHelper {
         public static final String COL_GAME_ID = "game_id";
         public static final String COL_PLAYER_ID = "player_id";
         public static final String COL_PERIOD = "period";
+        public static final String[] COLUMNS;
         // CREATE TABLE stat_data ( _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
         // , game_id INTEGER NOT NULL REFERENCES game (_id)
         // ,player_id INTEGER NOT NULL REFERENCES player (_id)
@@ -328,6 +399,7 @@ public class DbHelper extends SQLiteOpenHelper {
         public static final String SQL_CREATE_TABLE;
 
         static {
+            // Make "create table" SQL statement
             StringBuffer sb = new StringBuffer(
                     "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (\n" + COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL\n"
                             + ", " + COL_GAME_ID + " INTEGER NOT NULL REFERENCES " + Game.TABLE_NAME + " (" + Game.COL_ID + ")\n"
@@ -340,6 +412,17 @@ public class DbHelper extends SQLiteOpenHelper {
                 sb.append(",").append(dbColName.name()).append(" INTEGER DEFAULT (0) NOT NULL \n");
             }
             sb.append(");");
+            // Make array of columns
+            String[] tmpColumns = {COL_ID, COL_GAME_ID, COL_PLAYER_ID, COL_PERIOD};
+            COLUMNS = new String[tmpColumns.length + PlayerGamePojo.DbColumnName.values().length];
+            int idx = 0;
+            for(String colName : tmpColumns) {
+                COLUMNS[idx++] = colName;
+            }
+            for (PlayerGamePojo.DbColumnName dbColName : PlayerGamePojo.DbColumnName.values()) {
+                COLUMNS[idx++] = dbColName.name();
+            }
+
 
             SQL_CREATE_TABLE = sb.toString();
         }

@@ -16,4 +16,6 @@
     <string name="basketball_statistic">Basketball statistics</string>
     <string name="substitute">Substitute</string>
     <string name="opponent">Opponent</string>
+    <string name="save_changes_title">You have made some changes.</string>
+    <string name="save_changes_question">Would you like to save before exiting?</string>
 </resources>

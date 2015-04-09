@@ -97,7 +97,6 @@ public class StartupActivity extends Activity {
         */
         //
         mDbHelper = new DbHelper(this);
-        Log.v(Consts.TAG, DbHelper.GameStatistic.SQL_CREATE_TABLE);
     }
 
     @Override

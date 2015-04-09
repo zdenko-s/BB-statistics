@@ -46,6 +46,8 @@
     <TextView
         android:id="@+id/txtDescription"
         android:layout_width="0dp"
+        android:gravity="center_vertical"
+        android:textStyle="bold"
         android:layout_weight="10"
         android:layout_height="match_parent" />
 

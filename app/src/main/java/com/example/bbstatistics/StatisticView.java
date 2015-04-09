@@ -31,6 +31,7 @@ public class StatisticView extends View implements View.OnClickListener {
     private PlayerGamePojo[] mPlayersPojoCache; // Every player at game
     private ArrayList<Integer> mPlayersOnCourtIdx = new ArrayList<>(); // Indices of players on court.
     private int mHeaderTextSize;
+    private boolean mHasModifiedData = false;
 
     public StatisticView(Context context) {
         super(context);
@@ -292,5 +293,17 @@ public class StatisticView extends View implements View.OnClickListener {
         logPlayersOnCourt();
         forceLayout();
         //invalidate();
+    }
+
+    /**
+     * Returns modification stat of data grid
+     * @return
+     */
+    public boolean hasModifiedData() {
+        return mHasModifiedData;
+    }
+
+    public void clearHasModifiedData() {
+        this.mHasModifiedData = false;
     }
 }
