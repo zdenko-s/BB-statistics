@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -88,7 +87,7 @@ public class StatisticView extends View implements View.OnClickListener {
     private void adjustRowHeightAndTextSize() {
         // Calculate size of text based on 5+1 lines in grid (+1 header row)
         // mPlayersOnCourtIdx contains 'OpponentRowNum' numbers at beginning of ArrayList
-        int rowCount = Math.max( MIN_DATA_ROWS + Settings.OpponentRowNum, mPlayersOnCourtIdx.size() );
+        int rowCount = Math.max(MIN_DATA_ROWS + Settings.OpponentRowNum, mPlayersOnCourtIdx.size());
         // Add header row
         rowCount++;
         // One more row needed for header row
@@ -152,8 +151,7 @@ public class StatisticView extends View implements View.OnClickListener {
                 // Length in pixels could be calculated, but this estimate is faster to do.
                 str = String.format("%.7s", p.getPlayerName());
                 canvas.drawText(str, mHeaderTextSize, (i + 2) * mRowHeight - mVerticalPadding, mPlayerNamePaint);
-            }
-            else {
+            } else {
                 Log.e(TAG, "Player on court index " + playerIdx + " out of range.");
             }
         }
@@ -257,17 +255,17 @@ public class StatisticView extends View implements View.OnClickListener {
     /**
      * Data shared with parent activity. SubstituteDialog updates OnCourt values when Substitute is called
      *
-     * @param playersPojo
+     * @param playersPojo In memory cache of players data
      */
     public void setSharedPlayersData(PlayerGamePojo[] playersPojo) {
         mPlayersPojoCache = playersPojo;
-        for(int i : mPlayersOnCourtIdx) {
+        for (int i : mPlayersOnCourtIdx) {
             mPlayersPojoCache[i].setOnCourt(true);
         }
     }
 
     public void logPlayersOnCourt() {
-        StringBuffer sb = new StringBuffer("Content of mPlayersOnCourt:");
+        StringBuilder sb = new StringBuilder("Content of mPlayersOnCourt:");
         for (Integer l : mPlayersOnCourtIdx) {
             sb.append(l).append(",");
         }
@@ -285,7 +283,7 @@ public class StatisticView extends View implements View.OnClickListener {
             if (mPlayersPojoCache[i].isOnCourt())
                 mPlayersOnCourtIdx.add(i);  // Index is added for direct array access
         }
-        if(mPlayersOnCourtIdx.size() != countOfPlayersOnCourt) {
+        if (mPlayersOnCourtIdx.size() != countOfPlayersOnCourt) {
             // There may be more/less players marked as 'on court'. Recalculate row height.
             adjustRowHeightAndTextSize();
         }

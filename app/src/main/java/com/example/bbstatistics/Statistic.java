@@ -20,10 +20,6 @@ public class Statistic extends Activity implements View.OnClickListener {
     // (Depending on user preferences)
     private PlayerGamePojo[] mPlayers;
 
-    private final static class PersistenceKeys {
-        static final String PLAYERS_ON_COURT = "court";
-        static final String PLAYERS_ON_BENCH = "bench";
-    }
     private long mGameId;
     private DbHelper mDbHelper;
     private StatisticView mStatisticView;
@@ -47,9 +43,9 @@ public class Statistic extends Activity implements View.OnClickListener {
         Intent intent = getIntent();
         // Show game statistic
         mGameId = intent.getLongExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, DbHelper.INVALID_ID);
-        if(mGameId == DbHelper.INVALID_ID) {
-            return;
-        }
+//        if(mGameId == DbHelper.INVALID_ID) {
+//            return;
+//        }
     }
 
     private void addListeners() {
@@ -71,15 +67,14 @@ public class Statistic extends Activity implements View.OnClickListener {
         super.onResume();
         Log.v(TAG, "onResume()");
         mDbHelper.open();
-        if(mPlayers == null || mPlayers.length == 0) {
+        if (mPlayers == null || mPlayers.length == 0) {
             // Load players of the game from db
             mPlayers = mDbHelper.loadPlayersOfGame(mGameId);
             if (mPlayers != null) {
                 // Pass Players of game to StatisticView (child view)
                 mStatisticView.setSharedPlayersData(mPlayers);
             }
-        }
-        else {
+        } else {
             Log.v(TAG, "onResume() not reloading data.");
         }
     }
@@ -88,9 +83,8 @@ public class Statistic extends Activity implements View.OnClickListener {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         Log.v(Consts.TAG, "Statistic(Activity)#onRestoreInstanceState()");
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             Log.v(Consts.TAG, "Statistic(Activity)#onRestoreInstanceState(): saved state present");
-            //mPlayersOnCourt = savedInstanceState.getLongArray(PersistenceKeys.PLAYERS_ON_COURT);
         }
     }
 
@@ -101,7 +95,6 @@ public class Statistic extends Activity implements View.OnClickListener {
         mStatisticView.logPlayersOnCourt();
         // NOT called if the activity is closed by the user pressing the Back button or programmatically by calling finish().
         // called when the activity completes its active lifecycle, before it is killed
-        //outState.putLongArray(PersistenceKeys.PLAYERS_ON_COURT, mPlayersOnCourt);
     }
 
     @Override
@@ -146,7 +139,8 @@ public class Statistic extends Activity implements View.OnClickListener {
 
     /**
      * Show dialog where used can choose players to substitute
-     * @param view
+     *
+     * @param view Not used
      */
     public void substitutePlayers(View view) {
         // If number of players marked as "on court" changes, recalculate height of row
@@ -154,7 +148,7 @@ public class Statistic extends Activity implements View.OnClickListener {
         mDlg = new SubstitutePlayerDialog(this, mPlayers);
         mDlg.show();
         Log.v(Consts.TAG, "SubstituteDialog dismissed by " + (mSubstDialogDismissedByOk ? "OK" : "Cancel"));
-        if(mSubstDialogDismissedByOk) {
+        if (mSubstDialogDismissedByOk) {
             // Update statistic grid view with players on court
             mStatisticView.redraw();
         }

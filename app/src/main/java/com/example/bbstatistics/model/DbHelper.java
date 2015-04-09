@@ -90,8 +90,8 @@ public class DbHelper extends SQLiteOpenHelper {
     /**
      * Get all players of team
      *
-     * @param teamId
-     * @return
+     * @param teamId Players playing in team specified by i
+     * @return Cursor of players data
      */
     public Cursor getPlayersOfTeam(int teamId) {
         Cursor cursor = mDb.query(Player.TABLE_NAME, Player.COLUMNS,
@@ -107,11 +107,11 @@ public class DbHelper extends SQLiteOpenHelper {
     /**
      * Adds game
      *
-     * @param teamId
-     * @param opponentTeamId
-     * @param dateOfGame
-     * @param description
-     * @return
+     * @param teamId         ID of team whose player's statistic will be collected
+     * @param opponentTeamId ID of opponent team. Team summary will be collected.
+     * @param dateOfGame     Date when game is played
+     * @param description    Optional description
+     * @return id of DB record
      */
     public long addGame(int teamId, int opponentTeamId, String dateOfGame, String description) {
         ContentValues values = new ContentValues(Game.COLUMNS.length - 1);
@@ -119,7 +119,8 @@ public class DbHelper extends SQLiteOpenHelper {
         values.put(Game.COL_OPPONENT_TEAM_ID, opponentTeamId);
         values.put(Game.COL_DATE_TIME, dateOfGame);
         values.put(Game.COL_DESCRIPTION, description);
-        long _id = mDb.insert(Game.TABLE_NAME, null, values);
+        long _id;
+        _id = mDb.insert(Game.TABLE_NAME, null, values);
         return _id;
     }
 
@@ -135,7 +136,7 @@ public class DbHelper extends SQLiteOpenHelper {
     /**
      * Create tables if do not exist
      *
-     * @param db
+     * @param db Database which stores data.
      */
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -158,7 +159,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if(newVersion == 2 && oldVersion == 1) {
+        if (newVersion == 2 && oldVersion == 1) {
             Log.d(Consts.TAG, GameStatistic.SQL_CREATE_TABLE);
             db.execSQL(GameStatistic.SQL_CREATE_TABLE);
         }
@@ -166,12 +167,11 @@ public class DbHelper extends SQLiteOpenHelper {
 
     // Add players of game to linking table Player -> Player_Game <- Game
     public void addPlayersToGame(long gameId, Long[] playersAtGame) {
-        //TODO: Insert one by one players into DB
         // Each player is single entry in linking table
-        for (int i = 0; i < playersAtGame.length; i++) {
+        for (Long aPlayersAtGame : playersAtGame) {
             ContentValues values = new ContentValues();
             values.put(PlayerGame.COL_GAME_ID, gameId);
-            values.put(PlayerGame.COL_PLAYER_ID, playersAtGame[i]);
+            values.put(PlayerGame.COL_PLAYER_ID, aPlayersAtGame);
             mDb.insert(PlayerGame.TABLE_NAME, null, values);
         }
     }
@@ -179,8 +179,8 @@ public class DbHelper extends SQLiteOpenHelper {
     /**
      * Load data from DB and cache it as POJO objects.
      *
-     * @param gameId
-     * @return
+     * @param gameId Game ID
+     * @return Every roster of game
      */
     public PlayerGamePojo[] loadPlayersOfGame(long gameId) {
         // DB view is sorted by player number
@@ -256,6 +256,9 @@ public class DbHelper extends SQLiteOpenHelper {
         public static final String COL_DATE_TIME = "date_time";
         public static final String COL_DESCRIPTION = "description";
         public static final String[] COLUMNS = {COL_ID, COL_TEAM_ID, COL_OPPONENT_TEAM_ID, COL_DATE_TIME, COL_DESCRIPTION};
+        public static final String VGAME_NAME = "v_game";
+        public static final String VCOL_OPP_TEAM_NAME = "opp_team_name";
+        public static final String[] VGAME_COLUMNS = {COL_ID, COL_DATE_TIME, Team.COL_NAME, VCOL_OPP_TEAM_NAME, COL_DESCRIPTION};
         // CREATE TABLE game (_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, team_id INTEGER NOT NULL,
         // opponent_tem_id INTEGER NOT NULL, date_time DATETIME NOT NULL, description TEXT);
         static final String SQL_CREATE_TABLE = "create table if not exists "
@@ -264,10 +267,6 @@ public class DbHelper extends SQLiteOpenHelper {
                 + COL_OPPONENT_TEAM_ID + " integer not null,"
                 + COL_DATE_TIME + " datetime not null,"
                 + COL_DESCRIPTION + " text not null);";
-
-        public static final String VGAME_NAME = "v_game";
-        public static final String VCOL_OPP_TEAM_NAME = "opp_team_name";
-        public static final String[] VGAME_COLUMNS = {COL_ID, COL_DATE_TIME, Team.COL_NAME, VCOL_OPP_TEAM_NAME, COL_DESCRIPTION};
         //public static final String[] VGAME_COLUMNS_ = {COL_DATE_TIME, Team.COL_NAME, VCOL_OPP_TEAM_NAME, COL_DESCRIPTION};
 /*
         CREATE VIEW v_game AS
@@ -292,6 +291,7 @@ public class DbHelper extends SQLiteOpenHelper {
         public static final String COL_GAME_ID = "game_id";
         public static final String COL_PLAYER_ID = "player_id";
         public static final String[] COLUMNS = {COL_ID, COL_GAME_ID, COL_PLAYER_ID};
+        public static final String[] V_COLUMNS = {COL_ID, COL_GAME_ID, COL_PLAYER_ID, Player.COL_NUMBER, Player.COL_NAME};
         //CREATE TABLE IF NOT EXISTS player_game (_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, game_id INTEGER NOT NULL REFERENCES game (_id)
         // , player_id INTEGER REFERENCES player (_id) NOT NULL, CONSTRAINT unq_game_id_player_id UNIQUE (game_id, player_id));
         static final String SQL_CREATE_TABLE = "create table if not exists "
@@ -310,7 +310,6 @@ public class DbHelper extends SQLiteOpenHelper {
                 + " = p." + Player.COL_ID + " \n INNER JOIN " + Team.TEAM_TABLE + " AS t ON p." + Player.COL_TEAM_ID
                 + " = t." + Team.COL_ID + " \n INNER JOIN " + Game.TABLE_NAME + " AS g ON pg." + PlayerGame.COL_GAME_ID
                 + " = g." + Game.COL_ID + " \n ORDER BY g." + Game.COL_DATE_TIME + " DESC, p." + Player.COL_NUMBER + " ASC;";
-        public static final String[] V_COLUMNS = {COL_ID, COL_GAME_ID, COL_PLAYER_ID, Player.COL_NUMBER, Player.COL_NAME};
 
     }
 
@@ -328,7 +327,7 @@ public class DbHelper extends SQLiteOpenHelper {
         public static final String SQL_CREATE_TABLE;
 
         static {
-            StringBuffer sb = new StringBuffer(
+            StringBuilder sb = new StringBuilder(
                     "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (\n" + COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL\n"
                             + ", " + COL_GAME_ID + " INTEGER NOT NULL REFERENCES " + Game.TABLE_NAME + " (" + Game.COL_ID + ")\n"
                             + ", " + COL_PLAYER_ID + " INTEGER NOT NULL REFERENCES " + Player.TABLE_NAME + " (" + Player.COL_ID + ")\n"
