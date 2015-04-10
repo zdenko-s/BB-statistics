@@ -18,10 +18,30 @@ import android.widget.Toast;
 
 import com.example.bbstatistics.model.DbHelper;
 import com.example.bbstatistics.pojo.PlayerGamePojo;
+import com.readystatesoftware.countdown.CountdownChronometer;
+
+import java.util.Calendar;
 
 
 public class Statistic extends Activity implements View.OnClickListener {
     static final String TAG = "Statistic";
+    View.OnClickListener mStartListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            countdown.start();
+        }
+    };
+    View.OnClickListener mStopListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            countdown.stop();
+        }
+    };
+    View.OnClickListener mResetListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            Calendar c = Calendar.getInstance();
+            c.set(2011, Calendar.AUGUST, 26, 9, 0, 0);
+            countdown.setBase(c.getTimeInMillis());
+        }
+    };
     // In memory cache of player data. Sorted by dress number. First row may contain opponent team data.
     // (Depending on user preferences)
     private PlayerGamePojo[] mPlayers;
@@ -31,6 +51,7 @@ public class Statistic extends Activity implements View.OnClickListener {
     private StatisticView mStatisticView;
     private SubstitutePlayerDialog mDlg;
     private boolean mSubstDialogDismissedByOk;
+    private CountdownChronometer countdown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +70,30 @@ public class Statistic extends Activity implements View.OnClickListener {
         Intent intent = getIntent();
         // Show game statistic
         mGameId = intent.getLongExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, DbHelper.INVALID_ID);
+        // Count down chronometer related stuff
+        Button button;
+        countdown = (CountdownChronometer) findViewById(R.id.chronometer);
+
+        countdown.setBase(System.currentTimeMillis() + 30000);
+
+        button = (Button) findViewById(R.id.start);
+        button.setOnClickListener(mStartListener);
+
+        button = (Button) findViewById(R.id.stop);
+        button.setOnClickListener(mStopListener);
+
+        button = (Button) findViewById(R.id.reset);
+        button.setOnClickListener(mResetListener);
+/*
+        button = (Button) findViewById(R.id.set_format);
+        button.setOnClickListener(mSetFormatListener);
+
+        button = (Button) findViewById(R.id.clear_format);
+        button.setOnClickListener(mClearFormatListener);
+
+        button = (Button) findViewById(R.id.set_listener);
+        button.setOnClickListener(mSetOnCompleteListener);
+        */
     }
 
     private void addListeners() {
@@ -69,6 +114,7 @@ public class Statistic extends Activity implements View.OnClickListener {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "onResume()");
+        countdown.start();
         mDbHelper.open();
         if (mPlayers == null || mPlayers.length == 0) {
             // Load players of the game from db
@@ -132,8 +178,9 @@ public class Statistic extends Activity implements View.OnClickListener {
     @Override
     protected void onPause() {
         Log.v(Consts.TAG, "Statistic(Activity)#onPause()");
-        mStatisticView.logPlayersOnCourt();
         super.onPause();
+        countdown.stop();
+        mStatisticView.logPlayersOnCourt();
         mDbHelper.close();
     }
 
@@ -257,9 +304,32 @@ public class Statistic extends Activity implements View.OnClickListener {
         mDbHelper.savePlayerStatistic(mGameId, mPeriod, mPlayers);
         return true;
     }
+/*
+    View.OnClickListener mSetFormatListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            countdown
+                    .setCustomChronoFormat("%1$02d days, %2$02d hours, %3$02d minutes "
+                            + "and %4$02d seconds remaining");
+            countdown.setFormat("Formatted time (%s)");
+        }
+    };
 
-    private final static class PersistenceKeys {
-        static final String PLAYERS_ON_COURT = "court";
-        static final String PLAYERS_ON_BENCH = "bench";
-    }
+    View.OnClickListener mClearFormatListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            countdown.setCustomChronoFormat(null);
+            countdown.setFormat(null);
+        }
+    };
+
+    View.OnClickListener mSetOnCompleteListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            countdown.setOnCompleteListener(new Chronometer.OnChronometerTickListener() {
+                @Override
+                public void onChronometerTick(Chronometer chronometer) {
+                    //Toast.makeText(TAG, "We have lift off!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    };
+    */
 }

@@ -17,8 +17,8 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:text="@string/substitute"
-            android:onClick="substitutePlayers"/>
+            android:onClick="substitutePlayers"
+            android:text="@string/substitute" />
 
         <Button
             android:id="@+id/btn_plus_minus"
@@ -50,6 +50,38 @@
             android:paddingLeft="10sp"
             android:text="Result"
             android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <com.readystatesoftware.countdown.CountdownChronometer
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:format="@string/chronometer_initial_format"
+            android:gravity="center"
+            android:paddingBottom="30dip"
+            android:paddingTop="30dip" />
+
+        <Button
+            android:id="@+id/start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chronometer_start">
+
+            <requestFocus />
+        </Button>
+
+        <Button
+            android:id="@+id/stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chronometer_stop"></Button>
+
+        <Button
+            android:id="@+id/reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chronometer_reset"></Button>
+
     </LinearLayout>
 
     <com.example.bbstatistics.StatisticView
