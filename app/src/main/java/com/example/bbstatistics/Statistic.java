@@ -3,11 +3,11 @@ package com.example.bbstatistics;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.content.ClipboardManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,12 +25,6 @@ public class Statistic extends Activity implements View.OnClickListener {
     // In memory cache of player data. Sorted by dress number. First row may contain opponent team data.
     // (Depending on user preferences)
     private PlayerGamePojo[] mPlayers;
-
-    private final static class PersistenceKeys {
-        static final String PLAYERS_ON_COURT = "court";
-        static final String PLAYERS_ON_BENCH = "bench";
-    }
-
     private long mGameId;
     private int mPeriod = 1;
     private DbHelper mDbHelper;
@@ -174,10 +168,10 @@ public class Statistic extends Activity implements View.OnClickListener {
                 return true;
             case R.id.action_statistic_copy:
                 // Gets a handle to the clipboard service.
-                ClipboardManager clipboard = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
-                // Creates a new text clip to put on the clipboard
-                // TODO: Copy statistic data as XML to clipboard
-                ClipData clip = ClipData.newPlainText("simple text","Hello, World!");
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                //String xmlData = getGameStatisticXml();
+                String cvsData = getGameStatisticCvs();
+                ClipData clip = ClipData.newPlainText("BBStatistic of game:" + mGameId, cvsData);
                 // Set the clipboard's primary clip.
                 clipboard.setPrimaryClip(clip);
                 Toast.makeText(this, "Copied to clipboard!", Toast.LENGTH_SHORT).show();
@@ -185,6 +179,41 @@ public class Statistic extends Activity implements View.OnClickListener {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Creates CSV presentation of every player data, including header
+     *
+     * @return CSV formatted string.
+     */
+    private String getGameStatisticCvs() {
+        StringBuilder sb = new StringBuilder();
+        // Add header row
+        sb.append(DbHelper.Player.COL_ID).append(',');
+        sb.append(DbHelper.Player.COL_NUMBER).append(',');
+        sb.append(DbHelper.Player.COL_NAME);
+        // Add data fields
+        for (PlayerGamePojo.DbColumnName dbColumn : PlayerGamePojo.DbColumnName.values()) {
+            sb.append(',').append(dbColumn.name());
+        }
+        // Add data
+        for (PlayerGamePojo player : mPlayers) {
+            player.addCvs(sb);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Creates XML presentation of player's static data
+     *
+     * @return XML string presentation of data.
+     */
+    private String getGameStatisticXml() {
+        StringBuilder sb = new StringBuilder();
+        for (PlayerGamePojo player : mPlayers) {
+            player.addXml(sb);
+        }
+        return null;
     }
 
     /**
@@ -227,5 +256,10 @@ public class Statistic extends Activity implements View.OnClickListener {
     private boolean save() {
         mDbHelper.savePlayerStatistic(mGameId, mPeriod, mPlayers);
         return true;
+    }
+
+    private final static class PersistenceKeys {
+        static final String PLAYERS_ON_COURT = "court";
+        static final String PLAYERS_ON_BENCH = "bench";
     }
 }

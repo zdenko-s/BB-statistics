@@ -221,6 +221,11 @@ public class StartupActivity extends Activity {
         startActivityForResult(intent, Consts.ACTIVITY_REQUEST_EDIT_GAME);
     }
 
+    /**
+     * Opens grid view with statistic data.
+     *
+     * @param gameId
+     */
     public void startGame(long gameId) {
         Intent intent = new Intent(this, Statistic.class);
         intent.putExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, gameId);
