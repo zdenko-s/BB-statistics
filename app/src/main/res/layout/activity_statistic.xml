@@ -66,7 +66,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chronometer_start">
-
             <requestFocus />
         </Button>
 
@@ -74,13 +73,24 @@
             android:id="@+id/stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/chronometer_stop"></Button>
+            android:text="@string/chronometer_stop"/>
+
+        <Chronometer
+            android:id="@+id/chronometer1"
+            android:textColor="#4169E1"
+            android:textSize="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/button5"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"
+            android:text="Chronometer" />
 
         <Button
             android:id="@+id/reset"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/chronometer_reset"></Button>
+            android:text="@string/chronometer_reset"/>
 
     </LinearLayout>
 

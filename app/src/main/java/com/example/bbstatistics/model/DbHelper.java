@@ -191,7 +191,7 @@ public class DbHelper extends SQLiteOpenHelper {
             PlayerGamePojo[] ret = new PlayerGamePojo[cursor.getCount() + Settings.OpponentRowNum];
             int idx = 0;
             if (Settings.OpponentRowNum == 1) {
-                PlayerGamePojo pojo = new PlayerGamePojo(0, 111, "Opponentaaaaaaaa");
+                PlayerGamePojo pojo = new PlayerGamePojo(0, 0, "Opponentaaaaaaaa");
                 pojo.setOnCourt(true);
                 ret[idx++] = pojo;
             }

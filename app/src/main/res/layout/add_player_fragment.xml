@@ -13,19 +13,20 @@
             android:id="@+id/textViewNewPlayerNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Number" />
+            android:text="@string/addPlayer_number" />
 
         <EditText
             android:id="@+id/editTextNewPlayerNumber"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:inputType="number" />
 
         <TextView
             android:id="@+id/textViewNewPlayerName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Name" />
+            android:text="@string/addPlayer_name" />
 
         <EditText
             android:id="@+id/editTextNewPlayerName"
@@ -37,7 +38,7 @@
             android:id="@+id/btn_add_new_player"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add" />
+            android:text="@string/addPlayer_add" />
     </LinearLayout>
 
     <ListView
