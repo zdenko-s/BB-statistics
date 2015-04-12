@@ -27,6 +27,7 @@ public class StatisticView extends View implements View.OnClickListener {
     private int mNameColWidth;
     private Paint mLinePaint;
     private TextPaint mTextPaint = new TextPaint(), mHeaderTextPaint = new TextPaint(), mPlayerNamePaint = new TextPaint();
+    Paint mSolidBackground = new Paint();
     // In memory cached data of players
     private PlayerGamePojo[] mPlayersPojoCache; // Every player at game
     private ArrayList<Integer> mPlayersOnCourtIdx = new ArrayList<>(); // Indices of players on court.
@@ -67,6 +68,9 @@ public class StatisticView extends View implements View.OnClickListener {
         mTextPaint.setColor(Color.BLACK);
         //mTextPaint.setTextSize(100);
         mTextPaint.setTextScaleX(1.0f);
+        //
+        mSolidBackground.setStyle(Paint.Style.FILL);
+        mSolidBackground.setColor(Color.LTGRAY);
     }
 
     @Override
