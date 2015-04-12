@@ -19,7 +19,8 @@ import java.util.ArrayList;
 public class StatisticView extends View implements View.OnClickListener {
     private static final String TAG = "StatisticView";
     private static final int MIN_DATA_ROWS = 5;// Assumed value to calculate size of font to display in grid
-    private static final int NAME_COL_WIDTH_MULTIPLIER = 3;//, COLS = 10;
+    private static final int NAME_COL_WIDTH_MULTIPLIER = 3;
+    private static final int ADDITIONAL_COLUMNS_COUNT = 0;  // One column more for 'on court' cell
     private int mIncrement = 1; // When user touches display, value in cell is incremented by this (either +1 or -1)
     private float mVerticalPadding;
     private int mRowHeight, mColWidth;
@@ -64,7 +65,7 @@ public class StatisticView extends View implements View.OnClickListener {
         mHeaderTextPaint.setColor(Color.BLUE);
         mPlayerNamePaint.setColor(Color.GREEN);
         mTextPaint.setColor(Color.BLACK);
-        mTextPaint.setTextSize(100);
+        //mTextPaint.setTextSize(100);
         mTextPaint.setTextScaleX(1.0f);
     }
 
@@ -74,10 +75,10 @@ public class StatisticView extends View implements View.OnClickListener {
         //Bitmap canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         //Canvas drawCanvas = new Canvas(canvasBitmap);
 
-        // Name column is header column
-        mNameColWidth = getWidth() / (BBPlayer.getColumnCount() + NAME_COL_WIDTH_MULTIPLIER) * NAME_COL_WIDTH_MULTIPLIER;
+        // Name column is header column -
+        mNameColWidth = getWidth() / (BBPlayer.getColumnCount() + NAME_COL_WIDTH_MULTIPLIER + ADDITIONAL_COLUMNS_COUNT) * NAME_COL_WIDTH_MULTIPLIER;
         // Column width does not changes
-        mColWidth = (getWidth() - mNameColWidth) / BBPlayer.getColumnCount();
+        mColWidth = (getWidth() - mNameColWidth) / (BBPlayer.getColumnCount() + ADDITIONAL_COLUMNS_COUNT);
         adjustRowHeightAndTextSize();
     }
 
@@ -157,13 +158,13 @@ public class StatisticView extends View implements View.OnClickListener {
             }
         }
         // Display vertical lines
-        for (int col = 0; col < BBPlayer.getColumnCount(); col++) {
+        for (int col = 0; col < BBPlayer.getColumnCount() + ADDITIONAL_COLUMNS_COUNT; col++) {
             canvas.drawLine(mNameColWidth + col * mColWidth, 0, mNameColWidth + col * mColWidth, h, mLinePaint);
         }
         String[] colHeaders = BBPlayer.getColumnNames();
         // Draw column by column
         for (int col = 0; col < BBPlayer.getColumnCount(); col++) {
-            int dx = mNameColWidth + col * mColWidth + 5;
+            int dx = mNameColWidth + (col + ADDITIONAL_COLUMNS_COUNT) * mColWidth + 5;
             // Display column headers
             canvas.drawText(colHeaders[col], dx, mRowHeight - mVerticalPadding, mHeaderTextPaint);
             // Draw cells from up to down (row by row)
@@ -193,9 +194,9 @@ public class StatisticView extends View implements View.OnClickListener {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 //Log.d(Consts.TAG, "Touched at x:" + x + ", y:" + y);
-                if (x > mNameColWidth && y > mRowHeight) {
+                if (x > mNameColWidth + (ADDITIONAL_COLUMNS_COUNT * mColWidth) && y > mRowHeight) {
                     // Calculate row, col what was touched
-                    col = (int) ((x - mNameColWidth) / mColWidth);
+                    col = (int) ((x - mNameColWidth) / mColWidth - ADDITIONAL_COLUMNS_COUNT);
                     row = (int) ((y - mRowHeight) / mRowHeight);
                     Log.d(Consts.TAG, "Touched at col:" + col + ", row:" + row);
                     if (row >= 0 && col >= 0) {
