@@ -284,6 +284,21 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     /**
+     * Helper method that updates player specified by ID
+     * @param playerId Existing player ID
+     * @param playerNum Player name
+     * @param name Player number
+     * @return Updated player ID. If update succeeded, return same Player ID. If fails, return {@Link DbHelper.INVALID_ID}
+     */
+    public int updatePlayer(long playerId, int playerNum, String name) {
+        Log.d(Consts.TAG, "Updating player '" + name + "', #:" + playerNum + ", playerId:" + playerId);
+        ContentValues values = new ContentValues();
+        values.put(Player.COL_NUMBER, playerNum);
+        values.put(Player.COL_NAME, name);
+        return mDb.update(Player.TABLE_NAME, values, Player.COL_ID + "=?", new String[]{Player.COL_ID});
+    }
+
+    /**
      * Metadata related to DB table team
      */
     public final static class Team {

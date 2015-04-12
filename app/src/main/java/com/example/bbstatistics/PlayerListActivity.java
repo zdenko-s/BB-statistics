@@ -160,14 +160,19 @@ public class PlayerListActivity extends FragmentActivity
     public Cursor onItemAdded(String num, String name, long playerId) {
         // Add player to DB
         try {
+            int playerNum = Integer.parseInt(num);
             if(playerId == DbHelper.INVALID_ID) {
-                int playerNum = Integer.parseInt(num);
-                mDbHelper.addPlayer(mSelectedTeamId, playerNum, name);
-                return mDbHelper.getPlayersOfTeam(mSelectedTeamId);
+                long rowId = mDbHelper.addPlayer(mSelectedTeamId, playerNum, name);
+                if(rowId == DbHelper.INVALID_ID) {
+                    // Insert failed
+                }
             } else {
-                // TODO: Update player
-                return null;
+                int rowCount = mDbHelper.updatePlayer(playerId, playerNum, name);
+                if(rowCount != 1) {
+                    // Not one player updated
+                }
             }
+            return mDbHelper.getPlayersOfTeam(mSelectedTeamId);
         } catch (NumberFormatException nfe) {
             Toast.makeText(this, num + " is not number.", Toast.LENGTH_SHORT);
             return null;
