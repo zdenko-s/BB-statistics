@@ -10,8 +10,10 @@ public class PlayerGamePojo {
     public final static String[] FIELD_NAMES = {DbHelper.Player.COL_ID, DbHelper.Player.COL_NUMBER, DbHelper.Player.COL_NAME};
     public static final String BIND_CURSOR_COLUMNS[] = {FIELD_NAMES[1], FIELD_NAMES[2]};
     private boolean mDirty = false;
-    private long playerId;
-    private int playerNumber;
+    private boolean mPlaying = false;
+    private long playerId;  // DB unique ID
+    private int playerNumber;   // Number on shirt
+    private int mPlayingTime;   // seconds
     private String playerName;
     /*    public enum FieldName {
             POINT1(0),ATTEMPT1(1),POINT2(2),ATTEMPT2(3),POINT3(4),ATTEMPT3(5),DEF_REBOUND(6),OFF_REBOUND(7)
@@ -37,16 +39,17 @@ public class PlayerGamePojo {
 
     /**
      * Find item which ID is searched for
+     *
      * @param array Where to search
-     * @param id What to find
+     * @param id    What to find
      * @return Index of item, or -1 if not found
      */
     public static PlayerGamePojo findById(PlayerGamePojo[] array, long id) {
-        if(array == null)
+        if (array == null)
             return null;
-        for(int i = 0; i < array.length; i++) {
-            if(array[i].getPlayerId() == id)
-                return  array[i];
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].getPlayerId() == id)
+                return array[i];
         }
         return null;
     }
@@ -154,7 +157,21 @@ public class PlayerGamePojo {
         this.onCourt = onCourt;
     }
 
+    /**
+     * Gets does player plays, Playing time is increasing when game clock is not stopped.
+     * Some users prefer to display all players on screen and mark it as 'playing' by touching name cell
+     *
+     * @return true if playing
+     */
+    public boolean isPlaying() {
+        return mPlaying;
+    }
+
+    public void setPlaying(boolean mPlaying) {
+        this.mPlaying = mPlaying;
+    }
+
     public enum DbColumnName {
-        shot1pt, attempt1pt, shot2pt, attempt2pt, shot3pt, attempt3pt, def_rebound, off_rebound, turn_over, steal, foul, foul_given, assist
+        shot1pt, attempt1pt, shot2pt, attempt2pt, shot3pt, attempt3pt, def_rebound, off_rebound, turn_over, steal, foul, foul_given, assist, jump_ball
     }
 }

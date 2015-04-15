@@ -49,7 +49,7 @@ public class Statistic extends Activity implements View.OnClickListener {
     private int mPeriod = 1;
     private DbHelper mDbHelper;
     private StatisticView mStatisticView;
-    private SubstitutePlayerDialog mDlg;
+    private SubstitutePlayerDialog mSubstitutePlayerDlg;
     private boolean mSubstDialogDismissedByOk;
     private CountdownChronometer countdown;
 
@@ -271,8 +271,8 @@ public class Statistic extends Activity implements View.OnClickListener {
     public void substitutePlayers(View view) {
         // If number of players marked as "on court" changes, recalculate height of row
         //int playersMarkedOnCourt =
-        mDlg = new SubstitutePlayerDialog(this, mPlayers);
-        mDlg.show();
+        mSubstitutePlayerDlg = new SubstitutePlayerDialog(this, mPlayers);
+        mSubstitutePlayerDlg.show();
         Log.v(Consts.TAG, "SubstituteDialog dismissed by " + (mSubstDialogDismissedByOk ? "OK" : "Cancel"));
         if (mSubstDialogDismissedByOk) {
             // Update statistic grid view with players on court
@@ -285,12 +285,12 @@ public class Statistic extends Activity implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.btnOK:
                 mSubstDialogDismissedByOk = true;
-                mDlg.substitute();
-                mDlg.dismiss();
+                mSubstitutePlayerDlg.substitute();
+                mSubstitutePlayerDlg.dismiss();
                 break;
             case R.id.btnDismiss:
                 mSubstDialogDismissedByOk = false;
-                mDlg.dismiss();
+                mSubstitutePlayerDlg.dismiss();
                 break;
         }
     }

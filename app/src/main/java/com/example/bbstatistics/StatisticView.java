@@ -27,7 +27,7 @@ public class StatisticView extends View implements View.OnClickListener {
     private int mNameColWidth;
     private Paint mLinePaint;
     private TextPaint mTextPaint = new TextPaint(), mHeaderTextPaint = new TextPaint(), mPlayerNamePaint = new TextPaint();
-    Paint mSolidBackground = new Paint();
+    private Paint mSolidBackground = new Paint();
     // In memory cached data of players
     private PlayerGamePojo[] mPlayersPojoCache; // Every player at game
     private ArrayList<Integer> mPlayersOnCourtIdx = new ArrayList<>(); // Indices of players on court.
@@ -151,6 +151,10 @@ public class StatisticView extends View implements View.OnClickListener {
             if (playerIdx <= mPlayersPojoCache.length) {
                 PlayerGamePojo p = mPlayersPojoCache[playerIdx];
                 String str = String.format("%2d", p.getPlayerNumber());
+                // If player is not playing, draw solid rectangle as background
+                if (!p.isPlaying()) {
+                    canvas.drawRect(0, (i + 1) * mRowHeight, mNameColWidth, (i + 2) * mRowHeight, mSolidBackground);
+                }
                 canvas.drawText(str, 0, (i + 2) * mRowHeight - mVerticalPadding, mHeaderTextPaint);
                 // Display beginning of name with smaller font
                 // X coordinate is same as row height. Player number is displayed in square.
@@ -198,29 +202,36 @@ public class StatisticView extends View implements View.OnClickListener {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 //Log.d(Consts.TAG, "Touched at x:" + x + ", y:" + y);
-                if (x > mNameColWidth + (ADDITIONAL_COLUMNS_COUNT * mColWidth) && y > mRowHeight) {
-                    // Calculate row, col what was touched
-                    col = (int) ((x - mNameColWidth) / mColWidth - ADDITIONAL_COLUMNS_COUNT);
+                if (y > mRowHeight) {
                     row = (int) ((y - mRowHeight) / mRowHeight);
-                    Log.d(Consts.TAG, "Touched at col:" + col + ", row:" + row);
-                    if (row >= 0 && col >= 0) {
-                        if (row < dataRowsCount && col < BBPlayer.getColumnCount()) {
-                            // Indirect access to mPlayersPojoCache through index stored in ArrayList
-                            PlayerGamePojo p = mPlayersPojoCache[mPlayersOnCourtIdx.get(row)];
-                            // Is cell data 0? It can't be decremented
-                            if (mIncrement < 0 && p.getFieldValue(col) == 0)
-                                break;
-                            Log.d(Consts.TAG, "P " + p.getPlayerNumber() + "[" + col + "]=" + p.getFieldValue(col) + ". Inc:" + mIncrement);
-                            p.addToField(col, mIncrement);
-                            //Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col]);
-                            // Calculate size of rectangle to invalidate
-                            //int t = (row + 1) * mRowHeight;
-                            //int l = mNameColWidth + col * mColWidth;
-                            //Rect invalidRect = new Rect(l, t, l + mColWidth, t + mRowHeight);
-                            //Log.d(Consts.TAG, "Invalidate Rect:" + invalidRect.toShortString());
-                            //Log.v(Consts.TAG, "onTouchEvent - forcing invalidate()");
-                            invalidate();
+                    PlayerGamePojo p = mPlayersPojoCache[mPlayersOnCourtIdx.get(row)];
+                    if (x > mNameColWidth + (ADDITIONAL_COLUMNS_COUNT * mColWidth)) {
+                        // Calculate row, col what was touched
+                        col = (int) ((x - mNameColWidth) / mColWidth - ADDITIONAL_COLUMNS_COUNT);
+                        Log.d(Consts.TAG, "Touched at col:" + col + ", row:" + row);
+                        if (row >= 0 && col >= 0) {
+                            if (row < dataRowsCount && col < BBPlayer.getColumnCount()) {
+                                // Indirect access to mPlayersPojoCache through index stored in ArrayList
+                                // Is cell data 0? It can't be decremented
+                                if (mIncrement < 0 && p.getFieldValue(col) == 0)
+                                    break;
+                                Log.d(Consts.TAG, "P " + p.getPlayerNumber() + "[" + col + "]=" + p.getFieldValue(col) + ". Inc:" + mIncrement);
+                                p.addToField(col, mIncrement);
+                                //Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col]);
+                                // Calculate size of rectangle to invalidate
+                                //int t = (row + 1) * mRowHeight;
+                                //int l = mNameColWidth + col * mColWidth;
+                                //Rect invalidRect = new Rect(l, t, l + mColWidth, t + mRowHeight);
+                                //Log.d(Consts.TAG, "Invalidate Rect:" + invalidRect.toShortString());
+                                //Log.v(Consts.TAG, "onTouchEvent - forcing invalidate()");
+                                invalidate();
+                            }
                         }
+                    } else if (x < mNameColWidth) {
+                        // Touched player name cell. Revert
+                        p.setPlaying(!p.isPlaying());
+                    } else {
+                        // Touched some of additional columns
                     }
                 } else {
                     Log.d(Consts.TAG, "Touched out of bounds");
@@ -300,6 +311,7 @@ public class StatisticView extends View implements View.OnClickListener {
 
     /**
      * Returns modification stat of data grid
+     *
      * @return
      */
     public boolean hasModifiedData() {
