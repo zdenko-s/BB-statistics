@@ -171,7 +171,15 @@ public class PlayerGamePojo {
         this.mPlaying = mPlaying;
     }
 
+    public int getPlayingTime() {
+        return mPlayingTime;
+    }
+
+    public void setPlayingTime(int mPlayingTime) {
+        this.mPlayingTime = mPlayingTime;
+    }
+
     public enum DbColumnName {
-        shot1pt, attempt1pt, shot2pt, attempt2pt, shot3pt, attempt3pt, def_rebound, off_rebound, turn_over, steal, foul, foul_given, assist, jump_ball
+        shot1pt, attempt1pt, shot2pt, attempt2pt, shot3pt, attempt3pt, def_rebound, off_rebound, turn_over, steal, foul, foul_given, assist, loose_ball
     }
 }

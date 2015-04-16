@@ -215,11 +215,11 @@ public class DbHelper extends SQLiteOpenHelper {
             while (!cursor.isAfterLast()) {
                 Long playerId = cursor.getLong(cursor.getColumnIndex(GameStatistic.COL_PLAYER_ID));
                 // Find user in array of users
-                for(PlayerGamePojo player : ret) {
-                    if(player.getPlayerId() == playerId) {
-                        for(PlayerGamePojo.DbColumnName col : PlayerGamePojo.DbColumnName.values()) {
+                for (PlayerGamePojo player : ret) {
+                    if (player.getPlayerId() == playerId) {
+                        for (PlayerGamePojo.DbColumnName col : PlayerGamePojo.DbColumnName.values()) {
                             int val = cursor.getInt(cursor.getColumnIndex(col.name()));
-                            player.setFieldValue(col, (byte)val);
+                            player.setFieldValue(col, (byte) val);
                         }
                         // Load statistic for this game
                         break;
@@ -262,6 +262,7 @@ public class DbHelper extends SQLiteOpenHelper {
             for (PlayerGamePojo.DbColumnName dbColumn : PlayerGamePojo.DbColumnName.values()) {
                 statisticValues.put(dbColumn.name(), player.getFieldValue(dbColumn));
             }
+            statisticValues.put(GameStatistic.COL_PLAYING_TIME, player.getPlayingTime());
             if (updateUsers.contains(player.getPlayerId())) {
                 // UPDATE
                 // WHERE
@@ -285,9 +286,10 @@ public class DbHelper extends SQLiteOpenHelper {
 
     /**
      * Helper method that updates player specified by ID
-     * @param playerId Existing player ID
+     *
+     * @param playerId  Existing player ID
      * @param playerNum Player name
-     * @param name Player number
+     * @param name      Player number
      * @return Updated player ID. If update succeeded, return same Player ID. If fails, return {@Link DbHelper.INVALID_ID}
      */
     public int updatePlayer(long playerId, int playerNum, String name) {
@@ -400,16 +402,18 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     public final static class GameStatistic {
-        public static final String TABLE_NAME = "game_statistc";
+        public static final String TABLE_NAME = "game_statistic";
         public static final String COL_ID = "_id";
         public static final String COL_GAME_ID = "game_id";
         public static final String COL_PLAYER_ID = "player_id";
         public static final String COL_PERIOD = "period";
+        public static final String COL_PLAYING_TIME = "playing_time";
         public static final String[] COLUMNS;
         // CREATE TABLE stat_data ( _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
         // , game_id INTEGER NOT NULL REFERENCES game (_id)
         // ,player_id INTEGER NOT NULL REFERENCES player (_id)
         // ,period    INTEGER NOT NULL
+        // ,playing_time    INTEGER NOT NULL
         // ,colx INTEGER DEFAULT (0) NOT NULL
         public static final String SQL_CREATE_TABLE;
 
@@ -419,7 +423,7 @@ public class DbHelper extends SQLiteOpenHelper {
                     "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (\n" + COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL\n"
                             + ", " + COL_GAME_ID + " INTEGER NOT NULL REFERENCES " + Game.TABLE_NAME + " (" + Game.COL_ID + ")\n"
                             + ", " + COL_PLAYER_ID + " INTEGER NOT NULL REFERENCES " + Player.TABLE_NAME + " (" + Player.COL_ID + ")\n"
-                            + ", " + COL_PERIOD + " INTEGER NOT NULL\n"
+                            + ", " + COL_PERIOD + " INTEGER NOT NULL," + COL_PLAYING_TIME + " INTEGER DEFAULT (0) \n"
             );
             // add one by one SQL column definition (DDL)
             // ,colx INTEGER DEFAULT (0) NOT NULL
@@ -428,10 +432,10 @@ public class DbHelper extends SQLiteOpenHelper {
             }
             sb.append(");");
             // Make array of columns
-            String[] tmpColumns = {COL_ID, COL_GAME_ID, COL_PLAYER_ID, COL_PERIOD};
+            String[] tmpColumns = {COL_ID, COL_GAME_ID, COL_PLAYER_ID, COL_PERIOD, COL_PLAYING_TIME};
             COLUMNS = new String[tmpColumns.length + PlayerGamePojo.DbColumnName.values().length];
             int idx = 0;
-            for(String colName : tmpColumns) {
+            for (String colName : tmpColumns) {
                 COLUMNS[idx++] = colName;
             }
             for (PlayerGamePojo.DbColumnName dbColName : PlayerGamePojo.DbColumnName.values()) {

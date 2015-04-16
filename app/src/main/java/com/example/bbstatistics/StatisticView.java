@@ -64,7 +64,7 @@ public class StatisticView extends View implements View.OnClickListener {
         mLinePaint.setStrokeWidth(5f);
         // Set Paint properties
         mHeaderTextPaint.setColor(Color.BLUE);
-        mPlayerNamePaint.setColor(Color.GREEN);
+        mPlayerNamePaint.setColor(Color.BLUE);
         mTextPaint.setColor(Color.BLACK);
         //mTextPaint.setTextSize(100);
         mTextPaint.setTextScaleX(1.0f);
@@ -228,8 +228,10 @@ public class StatisticView extends View implements View.OnClickListener {
                             }
                         }
                     } else if (x < mNameColWidth) {
-                        // Touched player name cell. Revert
-                        p.setPlaying(!p.isPlaying());
+                        // Touched player name cell. Revert value
+                        // TODO: Should be player playing status change be possible only when clock does not work?
+                        if (row > 0)     // 0th row is opponent
+                            p.setPlaying(!p.isPlaying());
                     } else {
                         // Touched some of additional columns
                     }
