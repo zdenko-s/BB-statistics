@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.Toast;
 
 import com.example.bbstatistics.model.DbHelper;
@@ -27,11 +28,13 @@ public class Statistic extends Activity implements View.OnClickListener {
     static final String TAG = "Statistic";
     View.OnClickListener mStartListener = new View.OnClickListener() {
         public void onClick(View v) {
+            Log.v("countdown", "start");
             countdown.start();
         }
     };
     View.OnClickListener mStopListener = new View.OnClickListener() {
         public void onClick(View v) {
+            Log.v("countdown", "stop");
             countdown.stop();
         }
     };
@@ -71,11 +74,10 @@ public class Statistic extends Activity implements View.OnClickListener {
         // Show game statistic
         mGameId = intent.getLongExtra(Consts.ACTIVITY_REQUEST_DATA_GAMEID_KEY, DbHelper.INVALID_ID);
         // Count down chronometer related stuff
-        Button button;
         countdown = (CountdownChronometer) findViewById(R.id.chronometer);
+        countdown.setBase(System.currentTimeMillis() + 50000);
 
-        countdown.setBase(System.currentTimeMillis() + 30000);
-
+        Button button;
         button = (Button) findViewById(R.id.start);
         button.setOnClickListener(mStartListener);
 
@@ -84,6 +86,7 @@ public class Statistic extends Activity implements View.OnClickListener {
 
         button = (Button) findViewById(R.id.reset);
         button.setOnClickListener(mResetListener);
+
 /*
         button = (Button) findViewById(R.id.set_format);
         button.setOnClickListener(mSetFormatListener);
