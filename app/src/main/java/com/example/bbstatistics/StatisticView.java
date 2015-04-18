@@ -215,16 +215,12 @@ public class StatisticView extends View implements View.OnClickListener {
                                 // Is cell data 0? It can't be decremented
                                 if (mIncrement < 0 && p.getFieldValue(col) == 0)
                                     break;
-                                Log.d(Consts.TAG, "P " + p.getPlayerNumber() + "[" + col + "]=" + p.getFieldValue(col) + ". Inc:" + mIncrement);
-                                p.addToField(col, mIncrement);
-                                //Log.d(Consts.TAG, "data[" + (row) + "][" + col + "]=" + data[row][col]);
-                                // Calculate size of rectangle to invalidate
-                                //int t = (row + 1) * mRowHeight;
-                                //int l = mNameColWidth + col * mColWidth;
-                                //Rect invalidRect = new Rect(l, t, l + mColWidth, t + mRowHeight);
-                                //Log.d(Consts.TAG, "Invalidate Rect:" + invalidRect.toShortString());
-                                //Log.v(Consts.TAG, "onTouchEvent - forcing invalidate()");
-                                invalidate();
+                                // If player is not playing, do not register touch
+                                if (p.isPlaying()) {
+                                    Log.d(Consts.TAG, "P " + p.getPlayerNumber() + "[" + col + "]=" + p.getFieldValue(col) + ". Inc:" + mIncrement);
+                                    p.addToField(col, mIncrement);
+                                    invalidate();
+                                }
                             }
                         }
                     } else if (x < mNameColWidth) {
