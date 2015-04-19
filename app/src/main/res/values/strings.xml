@@ -19,9 +19,9 @@
     <string name="save_changes_title">You have made some changes.</string>
     <string name="save_changes_question">Would you like to save before exiting?</string>
     <string name="chronometer_initial_format">%s</string>
-    <string name="chronometer_start">Star</string>
+    <string name="chronometer_start">Start</string>
     <string name="chronometer_stop">Stop</string>
-    <string name="chronometer_reset">reset</string>
+    <string name="chronometer_resume">Resume</string>
     <string name="addPlayer_number">Number</string>
     <string name="addPlayer_name">Name</string>
     <string name="addPlayer_add">Add</string>

@@ -42,8 +42,8 @@
             android:layout_weight="1"
             android:format="@string/chronometer_initial_format"
             android:gravity="center"
-            android:paddingBottom="30dip"
-            android:paddingTop="30dip" />
+            android:textSize="30sp"
+            android:layout_gravity="bottom" />
 
         <TextView
             android:id="@+id/textView"
@@ -70,11 +70,11 @@
             android:text="@string/chronometer_stop" />
 
         <Button
-            android:id="@+id/reset"
+            android:id="@+id/resume"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/chronometer_reset" />
+            android:text="@string/chronometer_resume" />
 
     </LinearLayout>
 
