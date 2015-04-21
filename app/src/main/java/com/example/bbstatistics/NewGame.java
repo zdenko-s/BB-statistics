@@ -272,7 +272,7 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
      */
     @Override
     public void onClick(View v) {
-        final Calendar c = Calendar.getInstance();
+        final Calendar calendar = Calendar.getInstance();
         if (v == btnCalendar) {
             // Variable for storing date
             final int mYear, mMonth, mDay;
@@ -282,15 +282,15 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
             if (dateString.length() > 0) {
                 try {
                     Date formDate = dateFormatter.parse(dateString);
-                    c.setTime(formDate);
+                    calendar.setTime(formDate);
                 } catch (ParseException e) {
                     Log.d(Consts.TAG, "Parsing date failed:" + dateString);
                 }
             }
             // Get fields needed for DatePickerDialog constructor
-            mYear = c.get(Calendar.YEAR);
-            mMonth = c.get(Calendar.MONTH);
-            mDay = c.get(Calendar.DAY_OF_MONTH);
+            mYear = calendar.get(Calendar.YEAR);
+            mMonth = calendar.get(Calendar.MONTH);
+            mDay = calendar.get(Calendar.DAY_OF_MONTH);
 
             // Launch Date Picker Dialog
             DatePickerDialog dpd = new DatePickerDialog(this,
@@ -298,8 +298,8 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
                         @Override
                         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                             // Display Selected date in textbox
-                            c.set(year, monthOfYear, dayOfMonth);
-                            String formattedDate = dateFormatter.format(c.getTime());
+                            calendar.set(year, monthOfYear, dayOfMonth);
+                            String formattedDate = dateFormatter.format(calendar.getTime());
                             txtDate.setText(formattedDate);
                         }
                     }, mYear, mMonth, mDay);
@@ -314,14 +314,14 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
                 Log.d(Consts.TAG, "Parsing time:" + timeString);
                 try {
                     Date formTime = timeFormatter.parse(timeString);
-                    c.setTime(formTime);
+                    calendar.setTime(formTime);
                 } catch (ParseException e) {
                     Log.d(Consts.TAG, "Parsing time failed:" + timeString);
                 }
             }
             // Process to get Time
-            hour = c.get(Calendar.HOUR_OF_DAY);
-            minute = c.get(Calendar.MINUTE);
+            hour = calendar.get(Calendar.HOUR_OF_DAY);
+            minute = calendar.get(Calendar.MINUTE);
 
             // Launch Time Picker Dialog
             TimePickerDialog tpd = new TimePickerDialog(this,
@@ -329,9 +329,9 @@ public class NewGame extends ActionBarActivity implements View.OnClickListener {
                         @Override
                         public void onTimeSet(TimePicker view, int hourOfDay, int minuteOfHour) {
                             // Display Selected time in textbox
-                            c.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                            c.set(Calendar.MINUTE, minuteOfHour);
-                            String formattedTime = timeFormatter.format(c.getTime());
+                            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                            calendar.set(Calendar.MINUTE, minuteOfHour);
+                            String formattedTime = timeFormatter.format(calendar.getTime());
                             txtTime.setText(formattedTime);
                         }
                     }, hour, minute, true);

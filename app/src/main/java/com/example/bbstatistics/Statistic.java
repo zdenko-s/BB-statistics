@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.bbstatistics.model.DbHelper;
 import com.example.bbstatistics.pojo.PlayerGamePojo;
+import com.example.bbstatistics.util.DialogHelper;
 import com.readystatesoftware.countdown.CountdownChronometer;
 
 
@@ -26,18 +27,13 @@ public class Statistic extends Activity implements View.OnClickListener {
     View.OnClickListener mStartListener = new View.OnClickListener() {
         public void onClick(View v) {
             Log.v("countdown", "start");
-            countdown.start();
+            countdown.resume();
         }
     };
     View.OnClickListener mStopListener = new View.OnClickListener() {
         public void onClick(View v) {
             Log.v("countdown", "stop");
             countdown.stop();
-        }
-    };
-    View.OnClickListener mResumeListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            countdown.resume();
         }
     };
     // In memory cache of player data. Sorted by dress number. First row may contain opponent team data.
@@ -72,6 +68,15 @@ public class Statistic extends Activity implements View.OnClickListener {
         countdown = (CountdownChronometer) findViewById(R.id.chronometer);
         // Start 8 minutes in milliseconds ahead
         countdown.setBase(System.currentTimeMillis() + 8 * 60 * 1000);
+        countdown.stop();
+        countdown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Use TimeDialog to set Minute/Second when picked Hour/Minute
+                DialogHelper.getTime(countdown);
+                Log.d("countdown", "onClick() time-" + countdown.getText());
+            }
+        });
 
         Button button;
         button = (Button) findViewById(R.id.start);
@@ -79,9 +84,6 @@ public class Statistic extends Activity implements View.OnClickListener {
 
         button = (Button) findViewById(R.id.stop);
         button.setOnClickListener(mStopListener);
-
-        button = (Button) findViewById(R.id.resume);
-        button.setOnClickListener(mResumeListener);
 
 /*
         button = (Button) findViewById(R.id.set_format);

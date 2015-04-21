@@ -58,23 +58,13 @@
             android:id="@+id/start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/chronometer_start">
-
-            <requestFocus />
-        </Button>
+            android:text="@string/chronometer_start" />
 
         <Button
             android:id="@+id/stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chronometer_stop" />
-
-        <Button
-            android:id="@+id/resume"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/chronometer_resume" />
 
     </LinearLayout>
 
