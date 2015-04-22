@@ -72,6 +72,7 @@ public class Statistic extends Activity implements View.OnClickListener {
         countdown.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Time can be adjusted when chronometer is not running
                 // Use TimeDialog to set Minute/Second when picked Hour/Minute
                 DialogHelper.getTime(countdown);
                 Log.d("countdown", "onClick() time-" + countdown.getText());
@@ -85,16 +86,6 @@ public class Statistic extends Activity implements View.OnClickListener {
         button = (Button) findViewById(R.id.stop);
         button.setOnClickListener(mStopListener);
 
-/*
-        button = (Button) findViewById(R.id.set_format);
-        button.setOnClickListener(mSetFormatListener);
-
-        button = (Button) findViewById(R.id.clear_format);
-        button.setOnClickListener(mClearFormatListener);
-
-        button = (Button) findViewById(R.id.set_listener);
-        button.setOnClickListener(mSetOnCompleteListener);
-        */
     }
 
     private void addListeners() {
@@ -115,7 +106,7 @@ public class Statistic extends Activity implements View.OnClickListener {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "onResume()");
-        countdown.start();
+        //countdown.start();
         mDbHelper.open();
         if (mPlayers == null || mPlayers.length == 0) {
             // Load players of the game from db

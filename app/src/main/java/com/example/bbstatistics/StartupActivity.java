@@ -119,7 +119,7 @@ public class StartupActivity extends Activity {
         // Display list of games in list
         Cursor gamesCursor = mDbHelper.getGames();
         Cursor oldCursor = mDataAdapter.swapCursor(gamesCursor);
-        if(oldCursor != null && !oldCursor.isClosed())
+        if (oldCursor != null && !oldCursor.isClosed())
             oldCursor.close();
 //        Log.v(Consts.TAG, "E-StartupActivity.onResume()");
     }
@@ -163,20 +163,6 @@ public class StartupActivity extends Activity {
 
     public void addTeam(View view) {
         // Show dialog to add team
-//        Log.d(Consts.TAG, "addTeam clicked");
-        /*
-        final Dialog addTeamDlg = new Dialog(this);
-        addTeamDlg.setContentView(R.layout.add_team_dialog);
-        Button dismissBtn = (Button) addTeamDlg.findViewById(R.id.btn_dismiss);
-        dismissBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addTeamDlg.dismiss();
-            }
-        });
-        Log.d(Consts.TAG, "addTeam clicked. Show dialog");
-        addTeamDlg.show();
-        */
         AddTeamDialog dlg = new AddTeamDialog(this, mDbHelper);
         dlg.show();
     }
@@ -259,6 +245,7 @@ public class StartupActivity extends Activity {
 
     /**
      * Export SQLite database to SD card
+     *
      * @param view
      */
     public void exportDb(View view) {
@@ -266,7 +253,7 @@ public class StartupActivity extends Activity {
         File data = Environment.getDataDirectory();
         FileChannel source = null;
         FileChannel destination = null;
-        String currentDBPath = "/data/"+ "com.example.bbstatistics" + "/databases/" + DbHelper.DATABASE_NAME;
+        String currentDBPath = "/data/" + "com.example.bbstatistics" + "/databases/" + DbHelper.DATABASE_NAME;
         String backupDBPath = DbHelper.DATABASE_NAME;
         File currentDB = new File(data, currentDBPath);
         File backupDB = new File(sd, backupDBPath);
@@ -278,7 +265,7 @@ public class StartupActivity extends Activity {
             destination.close();
             Toast.makeText(this, "DB Exported!", Toast.LENGTH_LONG).show();
             Log.v(Consts.TAG, "Db exported to:" + backupDB.getAbsolutePath());
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

@@ -1,15 +1,14 @@
 package com.example.bbstatistics.util;
 
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.example.bbstatistics.Consts;
 
-import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -27,7 +26,8 @@ public class DialogHelper {
         final TextView textViewF = textView;
         final int hour, minute;
         final Calendar calendar = Calendar.getInstance();
-        final DateFormat timeFormatter = DateFormat.getTimeInstance();
+        //final DateFormat timeFormatter = DateFormat.getTimeInstance();
+        final SimpleDateFormat timeFormatter = new SimpleDateFormat("mm:ss");
         String timeString = textView.getText().toString();
         if (timeString.length() > 0) {
             Log.d(Consts.TAG, "Parsing time:" + timeString);
@@ -47,9 +47,10 @@ public class DialogHelper {
                 new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minuteOfHour) {
+                        Log.d(Consts.TAG, "Set time:" + hourOfDay + ":" + minuteOfHour);
                         // Display Selected time in TextView
-                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        calendar.set(Calendar.MINUTE, minuteOfHour);
+                        calendar.set(Calendar.MINUTE, hourOfDay);
+                        calendar.set(Calendar.SECOND, minuteOfHour);
                         textViewF.setText(timeFormatter.format(calendar.getTime()));
                     }
                 }, hour, minute, true);
