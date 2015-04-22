@@ -41,18 +41,18 @@ public class StartupActivity extends Activity {
 
     SimpleCursorAdapter mDataAdapter;
     private DbHelper mDbHelper;
-    private ListView mlvGames;
     private boolean mActivityResultOk = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 //        Log.v(Consts.TAG, "StartupActivity.onCreate()");
         super.onCreate(savedInstanceState);
+        ListView lvGames;
         setContentView(R.layout.activity_startup);
         // Init singleton
         BBPlayer.setContext(getApplicationContext());
         // Setup list, list's event listeners,
-        mlvGames = (ListView) findViewById(R.id.lvAllGames);
+        lvGames = (ListView) findViewById(R.id.lvAllGames);
         //mlvGames.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         //mlvGames.setBackgroundResource(R.drawable.listview_selector);
         // Create Adapter
@@ -65,15 +65,15 @@ public class StartupActivity extends Activity {
         mDataAdapter = new SimpleCursorAdapter(this, R.layout.row_layout_game
                 , null, DbHelper.Game.VGAME_COLUMNS, bindTo, 0);
 
-        mlvGames.setAdapter(mDataAdapter);
-        mlvGames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        lvGames.setAdapter(mDataAdapter);
+        lvGames.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(Consts.TAG, "onItemClick(); position:" + position + ", id:" + id);
                 view.setSelected(true);
             }
         });
-        mlvGames.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        lvGames.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(Consts.TAG, "onItemLongClick(); position:" + position + ", id:" + id);

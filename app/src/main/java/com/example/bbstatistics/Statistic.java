@@ -69,15 +69,15 @@ public class Statistic extends Activity implements View.OnClickListener {
         // Start 8 minutes in milliseconds ahead
         countdown.setBase(System.currentTimeMillis() + 8 * 60 * 1000);
         countdown.stop();
-        countdown.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Time can be adjusted when chronometer is not running
-                // Use TimeDialog to set Minute/Second when picked Hour/Minute
-                DialogHelper.getTime(countdown);
-                Log.d("countdown", "onClick() time-" + countdown.getText());
-            }
-        });
+//        countdown.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // Time can be adjusted when chronometer is not running
+//                // Use TimeDialog to set Minute/Second when picked Hour/Minute
+//                DialogHelper.getTime(countdown);
+//                Log.d("countdown", "onClick() time-" + countdown.getText());
+//            }
+//        });
 
         Button button;
         button = (Button) findViewById(R.id.start);
