@@ -30,6 +30,7 @@
 
         <EditText
             android:id="@+id/editTextNewPlayerName"
+            android:inputType="textCapSentences"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5" />
