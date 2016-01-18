@@ -169,6 +169,6 @@ public class TeamPlayersDetailFragment extends Fragment implements AdapterView.O
         /**
          * Callback for when an item has been added.
          */
-        public Cursor onItemAdded(String number, String name, long id);
+        Cursor onItemAdded(String number, String name, long id);
     }
 }

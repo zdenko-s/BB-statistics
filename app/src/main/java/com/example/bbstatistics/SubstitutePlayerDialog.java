@@ -75,7 +75,7 @@ public class SubstitutePlayerDialog extends Dialog {
         MatrixCursor cursor = new MatrixCursor(PlayerGamePojo.FIELD_NAMES, INITIAL_CURSOR_SIZE);
         for (int i = Settings.OpponentRowNum; i < mPlayersPojoRoRef.length; i++) {
             PlayerGamePojo p = mPlayersPojoRoRef[i];
-            String logLine = "getPlayersCursor. Player: _id:" + p.getPlayerId() + ",#:" + p.getPlayerNumber() + ", name:" + p.getPlayerName();
+            //String logLine = "getPlayersCursor. Player: _id:" + p.getPlayerId() + ",#:" + p.getPlayerNumber() + ", name:" + p.getPlayerName();
             if(onCourt) {
                 // Is player _id present in mPlayersOnCourt vector?
                 if(p.isOnCourt()) {
@@ -143,8 +143,8 @@ public class SubstitutePlayerDialog extends Dialog {
         if(arr == null || arr.length == 0)
             return false;
         int length = arr.length;
-        for(int i = 0; i < length; i++) {
-            if(arr[i] == val)
+        for (long anArr : arr) {
+            if (anArr == val)
                 return true;
         }
         return false;
